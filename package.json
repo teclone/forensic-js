@@ -1,0 +1,19 @@
+{
+  "name": "forensic-js",
+  "version": "1.0.0",
+  "description": "a modular javascript that offers excellent event management, application state management, fetch api, and lots more",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harrison-ifeanyichukwu/forensic-js.git"
+  },
+  "author": "Harrison Ifeanyichukwu <Harrisonifeanyichukwu@gmail.com> (http://fjsfoundations.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/harrison-ifeanyichukwu/forensic-js/issues"
+  },
+  "homepage": "https://github.com/harrison-ifeanyichukwu/forensic-js#readme"
+}
