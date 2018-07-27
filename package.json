@@ -4,8 +4,10 @@
   "description": "a modular javascript that offers excellent event management, application state management, fetch api, and lots more",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "lint": "eslint ./src --fix",
+    "test": "BABEL_ENV=test nyc mocha --recursive",
+    "watch-test": "npm run test -- -w"
   },
   "repository": {
     "type": "git",
@@ -18,10 +20,21 @@
   },
   "homepage": "https://github.com/harrison-ifeanyichukwu/forensic-js#readme",
   "devDependencies": {
+    "babel-preset-env": "1.7.0",
+    "babel-register": "6.26.0",
+    "chai": "4.1.2",
     "commitizen": "2.10.1",
-    "cz-conventional-changelog": "2.1.0"
+    "cz-conventional-changelog": "2.1.0",
+    "istanbul": "0.4.5",
+    "mocha": "5.2.0",
+    "nyc": "12.0.2"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
+  },
+  "nyc": {
+    "include": [
+      "src/modules/*.js"
+    ]
   }
 }
