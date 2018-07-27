@@ -26,6 +26,7 @@
     "commitizen": "2.10.1",
     "cz-conventional-changelog": "2.1.0",
     "istanbul": "0.4.5",
+    "jsdom": "11.12.0",
     "mocha": "5.2.0",
     "nyc": "12.0.2"
   },
@@ -33,6 +34,10 @@
     "path": "node_modules/cz-conventional-changelog"
   },
   "nyc": {
+    "require": [
+      "babel-register",
+      "./test/setup.js"
+    ],
     "include": [
       "src/modules/*.js"
     ]
