@@ -115,8 +115,6 @@ describe('Queue module', function() {
         it('should add alternate sort function based on a given criteria', function() {
             //create empty queue that uses Queue's default static fnSort method
             let queue = new Queue(null, true);
-            //push in some items
-            queue.push({id: 2, name: 'Rebecca'}, {id: 4, name: 'John'}, {id: 1, name: 'James'});
 
             expect(queue.alternateFnSorts).to.deep.equals({});
             let sortFunction = (item1, item2) => {
@@ -168,6 +166,65 @@ describe('Queue module', function() {
             let queue = new Queue(null, true);
             expect(function() {
                 expect(queue.getSortFunction('by-age')).to.equals(Queue.fnSort);
+            }).to.throw(Error);
+        });
+    });
+
+    describe('#addSearchFunction(criteria, fnSearch)', function() {
+        it('should add alternate search function based on a given criteria', function() {
+            //create empty queue that uses Queue's default static fnSearch method
+            let queue = new Queue(null, true);
+
+            expect(queue.alternateFnSearchs).to.deep.equals({});
+            let searchFunction = (key, item, caseSensitive) => {
+                return Queue.fnSearch(key, item.id, caseSensitive);
+            };
+
+            queue.addSearchFunction('by-id', searchFunction);
+
+            expect(queue.alternateFnSearchs).to.deep.equals({
+                'by-id': searchFunction
+            });
+        });
+
+        it('should throw TypeError if argument one is not a string', function() {
+            let queue = new Queue(null, true);
+            expect(function() {
+                queue.addSearchFunction(null);
+            }).to.throw(TypeError);
+        });
+
+        it('should throw TypeError if argument two is not a function', function() {
+            let queue = new Queue(null, true);
+            expect(function() {
+                queue.addSearchFunction('by-id', null);
+            }).to.throw(TypeError);
+        });
+    });
+
+    describe('#getSearchFunction(criteria?)', function() {
+        it(`should return the search function defined for the given criteria`, function() {
+            // create empty queue that uses Queue's default static fnSearch method
+            let queue = new Queue(null, true);
+
+            let searchById = function(key, item, caseSensitive) {
+                return Queue.fnSort(key, item.id, caseSensitive);
+            };
+            queue.addSearchFunction('by-id', searchById);
+            expect(queue.getSearchFunction('by-id')).to.equals(searchById);
+        });
+
+        it(`should return the default search function if no criteria is specified`, function() {
+            //create empty queue that uses Queue's default static fnSort method
+            let queue = new Queue(null, true);
+            expect(queue.getSearchFunction()).to.equals(Queue.fnSearch);
+        });
+
+        it(`should throw error if there is no search function defined for the given criteria`, function() {
+            //create empty queue that uses Queue's default static fnSearch method
+            let queue = new Queue(null, true);
+            expect(function() {
+                expect(queue.getSearchFunction('by-age')).to.equals(Queue.fnSearch);
             }).to.throw(Error);
         });
     });
