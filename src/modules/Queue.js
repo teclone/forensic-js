@@ -512,4 +512,22 @@ export default class Queue {
 
         return this;
     }
+
+    /**
+     * clones the queue internals using the given items.
+     *@param {*} [items] - item or array of items
+    */
+    cloneWith(items) {
+        return new this.constructor(items, this.sortable, this.caseSensitive, this.fnSort, this.fnSearch)
+            .addSortFunctions(this.alternateFnSorts)
+            .addSearchFunctions(this.alternateFnSearchs);
+    }
+
+    /**
+     * returns a clone of the object
+     *@returns {Queue}
+    */
+    clone() {
+        return this.cloneWith(this.items.slice(0));
+    }
 }

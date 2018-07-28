@@ -647,4 +647,53 @@ describe('Queue module', function() {
             });
         });
     });
+
+    describe('#cloneWith(items?)', function() {
+        it(`should clone the queue internals with the given optional item or array of items`, function() {
+            let sortFunction = function(item1, item2) {
+                    return Queue.fnSort(item1.id, item2.id);
+                },
+                searchFunction = function(key, item, caseSensitive) {
+                    return Queue.fnSearch(key, item.id, caseSensitive);
+                },
+                sortByName = function(item1, item2) {
+                    return Queue.fnSort(item1.name, item2.name);
+                },
+                searchByName = function(key, item, caseSensitive) {
+                    return Queue.fnSearch(key, item.name, caseSensitive);
+                };
+
+            let queue = new Queue([
+
+                {id: 3, name: 'Emmanuel', level: 200},
+                {id: 1, name: 'Harrison', level: 100},
+                {id: 2, name: 'Onyedikachi', level: 500},
+
+            ], true, true, sortFunction, searchFunction);
+
+            queue.addSortFunction('by-name', sortByName)
+                .addSearchFunction('by-name', searchByName);
+
+            let clone = queue.cloneWith(null); //get clone with empty items
+
+            expect(clone).to.be.lengthOf(0);
+
+            expect(queue.sortable).to.equals(clone.sortable);
+            expect(queue.caseSensitive).to.equals(clone.caseSensitive);
+
+            expect(queue.fnSort).to.equals(clone.fnSort);
+            expect(queue.fnSearch).to.equals(clone.fnSearch);
+
+            expect(queue.getSortFunction('by-name')).to.equals(clone.getSortFunction('by-name'));
+            expect(queue.getSearchFunction('by-name')).to.equals(clone.getSearchFunction('by-name'));
+        });
+    });
+
+    describe('#clone()', function() {
+        it(`should clone and return the clone`, function() {
+            let queue = new Queue([1,2,3,4]),
+                clone = queue.clone();
+            expect(queue).to.deep.equals(clone);
+        });
+    });
 });
