@@ -204,6 +204,40 @@ export default class Queue {
     }
 
     /**
+     * adds sort functions to the existing list of alternate sort functions
+     *@param {Object} entries - sort function entries with keys as criteria
+     *@throws {TypeError} throws type error if entries is not an object, or if
+     * criteria key is not a string or if entry value is not a function
+     *@returns {this}
+    */
+    addSortFunctions(entries) {
+        if (!Util.isPlainObject(entries))
+            throw new TypeError('argument is not an object');
+
+        for (let [criteria, fnSort] of Object.entries(entries))
+            this.addSortFunction(criteria, fnSort);
+
+        return this;
+    }
+
+    /**
+     * adds search functions to the existing list of alternate search functions
+     *@param {Object} entries - the search function entries with keys as criteria
+     *@throws {TypeError} throws type error if entries is not an object, or if
+     * criteria key is not a string or if entry value is not a function
+     *@returns {this}
+    */
+    addSearchFunctions(entries) {
+        if (!Util.isPlainObject(entries))
+            throw new TypeError('argument is not an object');
+
+        for (let [criteria, fnSearch] of Object.entries(entries))
+            this.addSearchFunction(criteria, fnSearch);
+
+        return this;
+    }
+
+    /**
      * return true if item meets implementation demand or false otherwise.
      * when extending this class, one can override it and define more generic screening test
      *@param {*} item - item to screen

@@ -229,6 +229,78 @@ describe('Queue module', function() {
         });
     });
 
+    describe('#addSortFunctions(entries)', function() {
+        it(`should take an object containing sort criteria and functions as key:value pair and
+        add them to the list of alternate sort functions. It uses #addSortFunction under the hood`, function() {
+            //create empty queue that uses Queue's default static fnSort && fnSearch methods
+            let queue = new Queue(null, true);
+
+            let sortById = (item1, item2) => {
+                    return Queue.fnSort(item1.id, item2.id);
+                },
+                sortByName = (item1, item2) => {
+                    return Queue.fnSort(item1.name, item2.name);
+                };
+
+            /**
+             * add two sort functions based on item's id and name criteria.
+             * both reuses Queue's static fnSort method to maintain accuracy
+            */
+            queue.addSortFunctions({
+                'by-id': sortById,
+                'by-name': sortByName
+            });
+
+            expect(queue.alternateFnSorts).to.deep.equals({
+                'by-id': sortById,
+                'by-name': sortByName
+            });
+        });
+
+        it('should throw TypeError if entries is not a plain object', function() {
+            let queue = new Queue(null, true);
+            expect(function() {
+                queue.addSortFunctions(null);
+            }).to.throw(TypeError);
+        });
+    });
+
+    describe('#addSearchFunctions(entries)', function() {
+        it(`should take an object containing search criteria and functions as key:value pair and
+        add them to the list of alternate search functions. It uses #addSearchFunction under the hood`, function() {
+            //create empty queue that uses Queue's default static fnSort && fnSearch methods
+            let queue = new Queue(null, true);
+
+            let searchById = (key, item, caseSensitive) => {
+                    return Queue.fnSearch(key, item.id, caseSensitive);
+                },
+                searchByName = (key, item, caseSensitive) => {
+                    return Queue.fnSearch(key, item.name, caseSensitive);
+                };
+
+            /**
+             * add two search functions based on item's id and name criteria.
+             * both reuses Queue's static fnSearch method to maintain accuracy
+            */
+            queue.addSearchFunctions({
+                'by-id': searchById,
+                'by-name': searchByName
+            });
+
+            expect(queue.alternateFnSearchs).to.deep.equals({
+                'by-id': searchById,
+                'by-name': searchByName
+            });
+        });
+
+        it('should throw TypeError if entries is not a plain object', function() {
+            let queue = new Queue(null, true);
+            expect(function() {
+                queue.addSearchFunctions(null);
+            }).to.throw(TypeError);
+        });
+    });
+
     describe('#Sort(criteria?)', function() {
         it('should sort the queue using the default sort function if no criteria is given', function() {
             expect((new Queue([4, 3, 6, 9, 5, 1, 20, 11], true)).items).to.deep
