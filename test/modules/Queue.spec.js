@@ -18,7 +18,7 @@ describe('Queue module', function() {
             expect(Queue.fnSort('harrison', [])).to.equals(-1);
             expect(Queue.fnSort({}, 'harrison')).to.equals(1);
 
-            expect(Queue.fnSort([], {})).to.equals(-1);
+            expect(Queue.fnSort([], {})).to.equals(0);
         });
     });
 
@@ -69,7 +69,7 @@ describe('Queue module', function() {
             let sortableQueue = new Queue(['James', 'james', 'jaMes', 3, 1], true);
 
             expect(sortableQueue.sortable).to.be.true;
-            expect(sortableQueue.items).to.deep.equals([1, 3, 'James', 'james', 'jaMes']);
+            expect(sortableQueue.items).to.deep.equals([1, 3, 'james', 'jaMes', 'James']);
 
             //create a non sortable queue
             let queue = new Queue(['James', 'james', 'jaMes', 3, 1], false);
@@ -493,6 +493,158 @@ describe('Queue module', function() {
         it('should return undefined for all calls on empty queue', function() {
             let queue = new Queue(null, false);
             expect(queue.last()).to.be.undefined;
+        });
+    });
+
+    describe('#empty()', function() {
+        it('should empty the queue when called and return this', function() {
+            let queue = new Queue([1, 3, 4, 5]);
+            expect(queue.empty()).to.equals(queue).and.to.be.lengthOf(0);
+        });
+    });
+
+    describe('#deleteIndex(index)', function() {
+        let queue = null;
+
+        beforeEach(function() {
+            queue = new Queue([1, 2, 3]);
+        });
+
+        it('should delete the item at the given index position', function() {
+            expect(queue.deleteIndex(0)).to.be.lengthOf(2);
+            expect(queue.toArray()).to.deep.equals([2, 3]);
+        });
+
+        it('should delete the item by calculating position from the end if index is negative', function() {
+            expect(queue.deleteIndex(-2)).to.be.lengthOf(2);
+            expect(queue.toArray()).to.deep.equals([1, 3]);
+        });
+
+        it('should do nothing if index is not a number, or it is out of range', function() {
+            expect(queue.deleteIndex(-5)).to.be.lengthOf(3);
+            expect(queue.deleteIndex()).to.be.lengthOf(3);
+        });
+
+        it('should do nothing if queue is empty', function() {
+            queue.empty();
+            expect(queue.deleteIndex(0)).to.be.lengthOf(0);
+        });
+    });
+
+    describe('search methods', function() {
+        let queue = null;
+
+        beforeEach(function() {
+            let defaultSortFunction = (item1, item2) => {
+                    return Queue.fnSort(item1.id, item2.id);
+                },
+                defaultSearchFunction = (key, item, caseSensitive) => {
+                    return Queue.fnSearch(key, item.id, caseSensitive);
+                };
+            queue = new Queue([
+                {id: 3, name: 'Emmanuel', level: 200},
+                {id: 1, name: 'Harrison', level: 100},
+                {id: 2, name: 'Onyedikachi', level: 500},
+
+            ], true, true, defaultSortFunction, defaultSearchFunction);
+
+            queue.addSortFunction('by-name', (item1, item2) => {
+                return Queue.fnSort(item1.name, item2.name);
+            });
+            queue.addSearchFunction('by-name', (key, item, caseSensitive) => {
+                return Queue.fnSearch(key, item.name, caseSensitive);
+            });
+        });
+
+        describe('#indexOf(key, criteria?)', function() {
+            it(`should search the queue and return item index position if item is found, it
+            uses the default search method if search criteria is not specified`, function() {
+                let queue = new Queue([1, 3, 5, 4, 6, 'Harrison', 'harrison', 'harrY',
+                    'harrISon', 'jack', 'JaCk', 'jay', 'Lovren', 'LoVren', 'Harris', 'Mon',
+                    'moN'], true, true);
+
+                let i = 0;
+                for (let item of queue) {
+                    expect(queue.indexOf(item)).to.equals(i);
+                    i += 1;
+                }
+            });
+
+            it(`should do no search and return -1 if queue is empty`, function() {
+                let queue = new Queue([], true, true);
+                expect(queue.indexOf(4)).to.equals(-1);
+            });
+
+            it(`should do no search and return -1 if search key is not defined or null`, function() {
+                let queue = new Queue([1, 2, 3], true, true);
+                expect(queue.indexOf(undefined)).to.equals(-1);
+                expect(queue.indexOf(null)).to.equals(-1);
+            });
+
+            it(`should iterate over the queue when searching a non sortable queue or searching for an object using Queue's fnSearch method`, function() {
+                let queue = new Queue(['Harrison', 1, 2, 3, 'Joy'], false, false); //case insensitive
+                expect(queue.indexOf('joy')).to.equals(4);
+                expect(queue.indexOf('Juan')).to.equals(-1);
+
+                let obj = {id: 'tester'};
+                queue = new Queue([3, 9, 5, obj, 0], true);
+                expect(queue.indexOf(obj)).to.equals(4);
+            });
+
+            it('should use the corresponding sort and search methods for the given search criteria', function() {
+                expect(queue.indexOf('Harrison', 'by-name')).to.equals(1);
+            });
+
+            it('should return -1 if item with given criteria is not found', function() {
+                expect(queue.indexOf(4)).to.be.equals(-1);
+            });
+
+            it('should throw error if there is no sort or search function defined for the given criteria', function() {
+                expect(function() {
+                    queue.indexOf(4, 'by-age');
+                }).to.throw(Error);
+            });
+        });
+
+        describe('#includes(key, criteria?)', function() {
+            it(`should return true if item is found, else return false. It is an aliase for the #has(key, criteria?) method`, function() {
+                expect(queue.includes(1)).to.be.true;
+                expect(queue.includes(4)).to.be.false;
+            });
+
+            it('should use the corresponding sort and search methods for the given search criteria', function() {
+                expect(queue.includes('Harrison', 'by-name')).to.be.true;
+                expect(queue.includes('Angela', 'by-name')).to.be.false;
+            });
+        });
+
+        describe('#find(key, criteria?, deleteIfFound?)', function() {
+            it('should return the item if found. It relies on the #indexOf(key, criteria?) method', function() {
+                expect(queue.find(1)).to.deep.equals({id: 1, name: 'Harrison', level: 100});
+            });
+
+            it(`should delete the item before returning it if the third deleteIfFound
+                argument is set to true`, function() {
+                queue.find(1, '', true);
+                expect(queue.length).to.equals(2);
+            });
+
+            it(`should return undefined if item with given criteria is not found`, function() {
+                expect(queue.find(4)).to.be.undefined;
+            });
+        });
+
+        describe('#deleteItem(item, criteria?)', function() {
+            it(`should delete the item if found. It relies on the #indexOf(key, criteria?)
+            method. it returns the this object`, function() {
+                expect(queue.deleteItem(1, '')).to.equals(queue);
+                expect(queue.length).to.equals(2);
+            });
+
+            it(`should do nothing if item does not exist`, function() {
+                queue.deleteItem(4, '');
+                expect(queue.length).to.equals(3);
+            });
         });
     });
 });
