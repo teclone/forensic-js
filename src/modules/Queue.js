@@ -170,6 +170,40 @@ export default class Queue {
     }
 
     /**
+     * adds search function to the existing list of alternate search functions
+     *@param {string} criteria - the criteria for which the search function will be utilized
+     *@param {Function} fnSearch - the search function
+     *@throws {TypeError} throws type error if criteria is not a string or if fnSearch is not a function
+     *@returns {this}
+    */
+    addSearchFunction(criteria, fnSearch) {
+        if (typeof criteria !== 'string')
+            throw new TypeError('argument one is not a string');
+
+        if (!Util.isCallable(fnSearch))
+            throw new TypeError('argument two is not a function');
+
+        this.alternateFnSearchs[criteria] = fnSearch;
+        return this;
+    }
+
+    /**
+     * returns the appropriate search function for the given criteria
+     *@param {string} criteria - the criteria for which the sort function will be utilized
+     *@returns {Function}
+     *@throws {Error} if there is no search function defined for the given criteria
+    */
+    getSearchFunction(criteria = '') {
+        if (!criteria)
+            return this.fnSearch;
+
+        if (typeof this.alternateFnSearchs[criteria] === 'undefined')
+            throw new Error(`no search function defined for the given ${criteria} criteria`);
+
+        return this.alternateFnSearchs[criteria];
+    }
+
+    /**
      * return true if item meets implementation demand or false otherwise.
      * when extending this class, one can override it and define more generic screening test
      *@param {*} item - item to screen
