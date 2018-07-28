@@ -333,4 +333,50 @@ describe('Queue module', function() {
             ]);
         });
     });
+
+    describe('#length', function() {
+        let queue = new Queue();
+        it('should return the number of items in the queue', function() {
+            expect(queue.length).to.equals(0);
+        });
+
+        it('should get updated when the number of items in the queue changes', function() {
+            queue.push('first');
+            expect(queue.length).to.equals(1);
+        });
+    });
+
+    describe('#screen(item)', function() {
+        it(`it should guard the queue and screen out null and undefined values before they
+        are put into the queue`, function() {
+            expect((new Queue([null, undefined, 1, 'hey'], true)).items).to.deep.equals([1, 'hey']);
+        });
+    });
+
+    describe('#toArray()', function() {
+        it('should return all items in the queue as an array', function() {
+            let queue = new Queue([1, 3, 4], false);
+            expect(queue.toArray()).to.be.an('array').and.to.deep.equals([1, 3, 4]);
+        });
+    });
+
+    describe('#[Symbol.iterator]()', function() {
+        it('should implement the iterable interface making queues to be iterable', function() {
+            let queue = new Queue([1, 2]),
+                sum = 0;
+            for (const item of queue)
+                sum += item;
+            expect(sum).to.equals(3);
+        });
+
+        it('should take care and account for item deletions, not missing any item as a result', function() {
+            let queue = new Queue([1, 2, 4, 5]),
+                sum = 0;
+            for (const item of queue) {
+                sum += item;
+                queue.items.shift();
+            }
+            expect(sum).to.equals(12);
+        });
+    });
 });
