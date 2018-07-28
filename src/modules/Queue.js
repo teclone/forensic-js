@@ -530,4 +530,90 @@ export default class Queue {
     clone() {
         return this.cloneWith(this.items.slice(0));
     }
+
+    /**
+     * iterates over the queue and calls the callback function
+     *@param {Function} callback - the callback function,
+     * the callback function will receive at least three arguments, the item, index, and the queue
+     * any additional parameters will be passed in between the item, and index parameter.
+     * the callback should returned anything other than undefined to stop the iteration
+     *@param {Object} [scope=this] - execution scope object
+     *@param {...*} [parameters] - comma separated list of extra item parameters to pass to callback
+     *@throws {Error} throws error if argument one is not a function
+    */
+    forEach(callback, scope, ...parameters) {
+        if(!Util.isCallable(callback))
+            throw new TypeError('argument one is not a function');
+
+        let iterable = this[Symbol.iterator](),
+            iteratorResult = iterable.next();
+        scope = Util.isObject(scope)? scope : this;
+
+        while(!iteratorResult.done) {
+            if (Util.runSafe(callback, scope, [iteratorResult.value, ...parameters,
+                iteratorResult.index, this]) !== undefined)
+                break;
+            iteratorResult = iterable.next();
+        }
+        return this;
+    }
+
+    /**
+     * tests whether all items in the queue pass test implemented by the callback method
+     *@param {Function} callback - the callback method
+     *@param {Object} [scope] - optional this object to call callback
+     *@returns {boolean}
+    */
+    every(callback, scope) {
+        scope = Util.isObject(scope)? scope : null;
+        return this.length > 0 && this.items.every(callback, scope);
+    }
+
+    /**
+     * tests whether one or more items in the queue pass the test implemented by the callback function
+     *@param {Function} callback - the callback method
+     *@param {Object} [scope] - optional this object to call callback
+     *@returns {boolean}
+    */
+    some(callback, scope) {
+        scope = Util.isObject(scope)? scope : null;
+        return this.length > 0 && this.items.some(callback, scope);
+    }
+
+    /**
+     * returns an array with the result of calling the provided callback on every item in the
+     * queue.
+     *@param {Function} callback - the callback method
+     *@param {Object} [scope] - optional this object to call callback
+     *@returns {Array}
+    */
+    map(callback, scope) {
+        scope = Util.isObject(scope)? scope : null;
+        return this.items.map(callback, scope);
+    }
+
+    /**
+     * reduces the items in the queue to an accumulation by calling each item on the given callback.
+     *@param {Function} callback - the callback method
+     *@param {Object} [initialValue] - optional initial value to use as accumulator
+     *@returns {Queue}
+    */
+    reduce(callback, initialValue) {
+        if (Util.isValidParameter(initialValue))
+            return this.items.reduce(callback, initialValue);
+        else
+            return this.items.reduce(callback);
+    }
+
+    /**
+     * creates a new queue with all items that pass the test implemented by the provided
+     * callback function
+     *@param {Function} callback - the callback method
+     *@param {Object} [scope] - optional this object to call callback
+     *@returns {Queue}
+    */
+    filter(callback, scope) {
+        scope = Util.isObject(scope)? scope : null;
+        return this.cloneWith(this.items.filter(callback, scope));
+    }
 }
