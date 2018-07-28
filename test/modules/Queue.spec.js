@@ -379,4 +379,120 @@ describe('Queue module', function() {
             expect(sum).to.equals(12);
         });
     });
+
+    describe('#push(...items)', function() {
+        it(`should add comma separated list of items that satisfies the screen test to the
+        end of the queue and return the this object`, function() {
+            let queue = new Queue([1, 2], false);
+
+            expect(queue.push(3, 4, null, undefined, 5, 6)).to.equals(queue);
+            expect(queue.toArray()).to.deep.equals([1, 2, 3, 4, 5, 6]);
+        });
+    });
+
+    describe('#unshift(...items)', function() {
+        it(`should add comma separated list of items that satisfies the screen test to the
+         beginning of the queue, shifting existing items accordingly`, function() {
+            let queue = new Queue([7, 8], false);
+
+            queue.unshift(null, 3, 4, undefined, 5, 6);
+            expect(queue.toArray()).to.deep.equals([3, 4, 5, 6, 7, 8]);
+        });
+    });
+
+    describe('#put(item, pos?, replace?)', function() {
+        it('should push the item to the end of the queue if it passes the screen test', function() {
+            let queue = new Queue([1, 3], false);
+            queue.put(5);
+            expect(queue.toArray()).to.deep.equals([1, 3, 5]);
+        });
+
+        it('should do nothing if item fails the screen test', function() {
+            let queue = new Queue([1, 3], false);
+            queue.put(null);
+            expect(queue.toArray()).to.deep.equals([1, 3]);
+        });
+
+        it(`should accept a second optional pos argument that specifies the index position to put
+        the item. It does not replace existing item by default`, function() {
+            let queue = new Queue([1, 3], false);
+            queue.put(2, 1);
+            expect(queue.toArray()).to.deep.equals([1, 2, 3]);
+        });
+
+        it(`should replace existing item at the given index position if the third boolean
+        replace argument is set to true`, function() {
+            let queue = new Queue([1, 3], false);
+            queue.put(2, 1, true);
+            expect(queue.toArray()).to.deep.equals([1, 2]);
+        });
+    });
+
+    describe('#item(pos)', function() {
+        let queue = null;
+
+        beforeEach(function() {
+            queue = new Queue([1, 2, 3, 4], false);
+        });
+        it('should return the item at the given index position', function() {
+            expect(queue.item(0)).to.equals(1);
+        });
+
+        it('should return the item by calculating position from the end if index is negative', function() {
+            expect(queue.item(-2)).to.equals(3);
+        });
+
+        it('should return undefined if index is out of range or if no index is given', function() {
+            expect(queue.item(-5)).to.be.undefined;
+            expect(queue.item()).to.be.undefined;
+        });
+    });
+
+    describe('#shift()', function() {
+        it('should remove and return the first item in the queue', function() {
+            let queue = new Queue([1, 2, 3, 4], false);
+            expect(queue.shift()).to.equals(1);
+            expect(queue.length).to.equals(3);
+        });
+        it('should return undefined for all calls on empty queue', function() {
+            let queue = new Queue(null, false);
+            expect(queue.shift()).to.be.undefined;
+        });
+    });
+
+    describe('#pop()', function() {
+        it('should remove and return the last item in the queue', function() {
+            let queue = new Queue([1, 2, 3, 4], false);
+            expect(queue.pop()).to.be.equals(4);
+            expect(queue.length).to.equals(3);
+        });
+        it('should return undefined for all calls on empty queue', function() {
+            let queue = new Queue(null, false);
+            expect(queue.pop()).to.be.undefined;
+        });
+    });
+
+    describe('#first()', function() {
+        it('should return the first item in the queue without removing it', function() {
+            let queue = new Queue([1, 2, 3, 4], false);
+            expect(queue.first()).to.equals(1);
+            expect(queue.length).to.equals(4);
+        });
+        it('should return undefined for all calls on empty queue', function() {
+            let queue = new Queue(null, false);
+            expect(queue.first()).to.be.undefined;
+        });
+    });
+
+    describe('#last()', function() {
+        it('should return the last item in the queue without removing it', function() {
+            let queue = new Queue([1, 2, 3, 4], false);
+            expect(queue.last()).to.be.equals(4);
+            expect(queue.length).to.equals(4);
+        });
+        it('should return undefined for all calls on empty queue', function() {
+            let queue = new Queue(null, false);
+            expect(queue.last()).to.be.undefined;
+        });
+    });
 });

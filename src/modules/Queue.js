@@ -296,4 +296,90 @@ export default class Queue {
         this.items.push(...items.filter(this.screen, this));
         return this.sort();
     }
+
+    /**
+     * adds comma separated list of items that satisfy the screen test to the beginning of the queue
+     * shifting other items accordingly
+     *@param {...*} items - comma separated list of items to add
+     *@returns {this}
+    */
+    unshift(...items) {
+        this.items.unshift(...items.filter(this.screen, this));
+        return this.sort();
+    }
+
+    /**
+     * puts the item at the specified zero-indexed position if it passes screen test
+     *@param {*} item - item to append
+     *@param {number} [pos] - zero-indexed location to append item,
+     * if not specified, the item is pushed to the end of the queue
+     *@param {boolean} [replace=false] - set true to replace the item at the stated position
+    */
+    put(item, pos, replace) {
+        if (this.screen(item)) {
+
+            if (Util.isNumber(pos) && replace)
+                this.items.splice(pos, 1, item);
+
+            else if (Util.isNumber(pos))
+                this.items.splice(pos, 0, item);
+
+            else
+                this.items.push(item);
+
+            this.sort();
+        }
+        return this;
+    }
+
+    /**
+     * returns the item at the given zero-indexed location
+     *@param {number} pos - the zero-indexed position. negative numbers are resolved from
+     * the end position
+     *@returns {*} returns the item if location is feasible, or undefined if otherwise
+    */
+    item(pos) {
+        if (this.length > 0 && Util.isNumber(pos)) {
+            if (pos < 0)
+                pos += this.length;
+
+            if (pos >=0 && pos < this.length)
+                return this.items[pos];
+        }
+        return undefined;
+    }
+
+    /**
+     * removes and returns the first item in the queue
+     *@returns {*}
+    */
+    shift() {
+        return this.items.shift();
+    }
+
+    /**
+     * removes and returns the last item in the queue
+     *@returns {*}
+    */
+    pop() {
+        return this.items.pop();
+    }
+
+    /**
+     * returns the first item in the queue without removing it
+     * it returns undefined if queue is empty
+     *@returns {*}
+    */
+    first() {
+        return this.item(0);
+    }
+
+    /**
+     * returns the last item in the queue without removing it
+     * it returns undefined if queue is empty
+     *@returns {*}
+    */
+    last() {
+        return this.item(this.length - 1);
+    }
 }
