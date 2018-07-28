@@ -14,11 +14,9 @@ export default class Queue {
      *@returns {number}
     */
     static fnSort(one, two) {
-        //both are equal, return 0
         if (one === two)
             return 0;
 
-        //if both are numbers, return their difference
         if (Util.isNumber(one) && Util.isNumber(two))
             return (one - two) < 0? -1 : 1;
 
@@ -30,11 +28,13 @@ export default class Queue {
 
         //if both are strings
         if (typeof one === 'string' && typeof two === 'string') {
-            //convert all to uppercase and sort
-            let upOne = one.toUpperCase(),
-                upTwo = two.toUpperCase();
+            let lcOne = one.toLowerCase(),
+                lcTwo = two.toLowerCase();
 
-            return upOne > upTwo? 1 : -1;
+            if (lcOne === lcTwo)
+                return one < two? 1 : -1;
+            else
+                return lcOne < lcTwo? -1 : 1;
         }
 
         if (typeof one === 'string')
@@ -43,7 +43,7 @@ export default class Queue {
         if (typeof two === 'string')
             return 1;
 
-        return -1;
+        return 0;
     }
 
     /**
@@ -70,14 +70,16 @@ export default class Queue {
             return 1;
 
         if (typeof key === 'string' && typeof item === 'string') {
-            //convert to uppercase and check sort in that state
-            let upKey = key.toUpperCase(),
-                upItem = item.toUpperCase();
+            let lcKey = key.toLowerCase(),
+                lcItem = item.toLowerCase();
 
-            if (!caseSensitive && upKey === upItem)
+            if (!caseSensitive && lcKey === lcItem)
                 return 0;
+
+            if (lcKey === lcItem)
+                return key < item? 1 : -1;
             else
-                return upKey > upItem? 1 : -1;
+                return lcKey < lcItem? -1 : 1;
         }
 
         if (typeof key === 'string')
@@ -188,7 +190,7 @@ export default class Queue {
      *@returns {Function}
      *@throws {Error} if there is no sort function defined for the given criteria
     */
-    getSortFunction(criteria = '') {
+    getSortFunction(criteria) {
         if (!criteria)
             return this.fnSort;
 
@@ -222,7 +224,7 @@ export default class Queue {
      *@returns {Function}
      *@throws {Error} if there is no search function defined for the given criteria
     */
-    getSearchFunction(criteria = '') {
+    getSearchFunction(criteria) {
         if (!criteria)
             return this.fnSearch;
 
@@ -281,7 +283,7 @@ export default class Queue {
      *@param {string} [criteria] - sort criteria
      *@returns {this}
     */
-    sort(criteria = '') {
+    sort(criteria) {
         if(this.sortable && this.length > 0)
             this.items.sort(this.getSortFunction(criteria));
         return this;
@@ -381,5 +383,133 @@ export default class Queue {
     */
     last() {
         return this.item(this.length - 1);
+    }
+
+    /**
+     * empties the queue
+     *@returns {this}
+    */
+    empty() {
+        this.items = null;
+        this.items = [];
+        return this;
+    }
+
+    /**
+     * deletes item at the given index position from the queue
+     *@param {number} index - zero-indexed position to delete. negative index are resolved from
+     * the end
+     *@returns {this}
+    */
+    deleteIndex(index) {
+        if (this.length === 0)
+            return this;
+        if (!Util.isNumber(index))
+            return this;
+
+        if (index < 0)
+            index += this.length;
+
+        if (index >= 0 && index < this.length)
+            this.items.splice(index, 1);
+
+        return this;
+    }
+
+    /**
+     * searches the queue for a given hash using a particular search criteria
+     *@param {*} key - the search key
+     *@param {string} criteria - the search criteria to use. uses default search function
+     * if not given
+     *@returns {number} returns the items index if found or -1 if not found
+     *@throws {TypeError} - if you try searching for objects without specifying a search
+     * criteria that you have defined
+    */
+    indexOf(key, criteria) {
+        if (this.length === 0 || typeof key === 'undefined' || key === null)
+            return -1;
+
+        let fnSearch = this.getSearchFunction(criteria);
+
+        //run iteration if queue is not sortable or if we are searching for an object
+        // and there is no search method defined by the user
+        if (!this.sortable || (fnSearch === Queue.fnSearch && Util.isObject(key))) {
+            let keyIsString = typeof key === 'string',
+                i = 0;
+            for (let item of this) {
+                if (item === key)
+                    return i;
+                if (!this.caseSensitive && keyIsString && typeof item === 'string' &&
+                    key.toUpperCase() === item.toUpperCase())
+                    return i;
+                i += 1;
+            }
+            return -1;
+        }
+
+        let low = 0,
+            high = this.length - 1,
+            middle = Math.floor((high + low + 1) / 2),
+            i = 0;
+
+        this.sort(criteria);
+        do {
+            i = fnSearch(key, this.items[middle], this.caseSensitive);
+
+            if (i === 0)
+                return middle;
+            else if (i < 0)
+                high = middle - 1;
+            else
+                low = middle + 1;
+
+            middle = Math.floor((high + low + 1) / 2);
+        }
+        while (low <= high);
+
+        return -1;
+    }
+
+    /**
+     * searches the queue for the given key. aliase for the has method
+     *@param {*} key - the search key
+     *@param {string} criteria - the search criteria to use
+     *@returns {boolean} returns true if queue has item or false if otherwise
+    */
+    includes(key, criteria) {
+        return this.indexOf(key, criteria) > -1;
+    }
+
+    /**
+     * searches and returns the item that matches the key
+     *@param {*} key - the search key
+     *@param {string} [criteria] - the search criteria to use
+     *@param {boolean} [deleteIfFound=false] - a boolean value indicating if item should be deleted if it is found
+     *@returns {*} returns the item if found or returns undefined if not found
+    */
+    find(key, criteria, deleteIfFound = false) {
+        let index = this.indexOf(key, criteria);
+        if (index > -1) {
+            let item = this.items[index];
+            if (deleteIfFound) {
+                this.deleteIndex(index);
+            }
+            return item;
+        }
+        return undefined;
+    }
+
+    /**
+     * searches and deletes the item if found
+     *@param {*} item - item to delete
+     *@param {string} [criteria] - the search criteria to use
+     *@returns {this}
+    */
+    deleteItem(item, criteria) {
+        let index = this.indexOf(item, criteria);
+        if (index > -1)
+            this.deleteIndex(index);
+
+        return this;
     }
 }
