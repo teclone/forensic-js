@@ -135,6 +135,35 @@ export default class Queue {
     }
 
     /**
+     * convert and return queue as an array
+     *@returns {Array}
+    */
+    toArray() {
+        return [...this.items];
+    }
+
+    /**
+     * implement the iterable interface
+     *@private
+    */
+    [Symbol.iterator]() {
+        let items = this.items, index = 0, length = items.length;
+        return {
+            next() {
+                //check if some items have been deleted
+                if (items.length < length) {
+                    index -= length - items.length;
+                    length = items.length;
+                }
+                if(index < length)
+                    return {done: false, value: items[index], index: index++};
+                else
+                    return {done: true, value: undefined, index: undefined};
+            }
+        };
+    }
+
+    /**
      * adds sort function to the existing list of alternate sort functions.
      *
      *@param {string} criteria - the criteria for which the sort function will be utilized
