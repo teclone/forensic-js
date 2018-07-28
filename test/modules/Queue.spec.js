@@ -696,4 +696,237 @@ describe('Queue module', function() {
             expect(queue).to.deep.equals(clone);
         });
     });
+
+    describe('#forEach(callback, scope?, ...parameters?)', function() {
+        let queue = null;
+        beforeEach(function() {
+            queue = new Queue([2, 4, 6, 8]);
+        });
+
+        it(`should call the callback function on every item in the queue passing in the
+        current item, its index and queue as parameters`, function() {
+            let sumOfIndex = 0,
+                sumOfItems = 0;
+
+            queue.forEach((item, index) => {
+                sumOfIndex += index;
+            });
+
+            expect(sumOfIndex).to.equals(6);
+
+            queue.forEach((item) => {
+                sumOfItems += item;
+            });
+
+            expect(sumOfItems).to.be.equals(20);
+        });
+
+        it(`should exit the iteration once the method returns anything that is not undefined`, function() {
+            let callCount = 0;
+            queue.forEach(() => {
+                callCount += 1;
+                return 0;
+            });
+
+            expect(callCount).to.equals(1);
+        });
+
+        it('should throw TypeError if argument one is not a function', function() {
+            expect(function() {
+                queue.forEach({});
+            }).to.throw(TypeError);
+        });
+
+        it('should take an optional scope object to call the processor on', function() {
+            let scope = {},
+                correctScopeCount = 0;
+            queue.forEach(function() {
+                if (scope === this)
+                    correctScopeCount += 1;
+            }, scope);
+            expect(correctScopeCount).to.equals(4);
+        });
+
+        it(`should take an optional comma separated list of extra parameters, the parameters
+        are passed inbetween the item and index parameter`, function() {
+            let correctParameterCount = 0;
+
+            queue.forEach(function(item, param1, param2) {
+                if (param1 === 'hey' && param2 === 'ho')
+                    correctParameterCount += 1;
+            }, null, 'hey', 'ho');
+
+            expect(correctParameterCount).to.equals(4);
+        });
+    });
+
+    describe('#every(callback, scope?)', function() {
+        let queue = new Queue([2, 4, 6, 8]);
+        it('should return true if the callback method returns true for all items in the queue', function() {
+            expect(queue.every(item => item % 2 === 0)).to.be.true;
+            expect(queue.every(item => item > 1)).to.be.true;
+        });
+
+        it('should return false if any item in the queue fails the callback test condition', function() {
+            queue.put(1).put(0);
+            expect(queue.every(item => item % 2 === 0)).to.be.false;
+            expect(queue.every(item => item > 1)).to.be.false;
+        });
+
+        it('should throw TypeError if callback is not a function', function() {
+            expect(function() {
+                queue.every(null);
+            }).to.throw(TypeError);
+        });
+
+        it('should take an optional execution scope object as second parameter', function() {
+            let scopedCallCount = 0,
+                scope = {name: 'scoping'},
+                queue = new Queue([1, 2, 3, 4]);
+
+            queue.every(function() {
+                if (this === scope)
+                    scopedCallCount += 1;
+                return true;
+            }, scope);
+
+            expect(scopedCallCount).to.equals(4);
+        });
+
+        it('should return false for all tests on empty queue', function() {
+            queue.empty();
+            expect(queue.every(function() {return true;})).to.be.false;
+        });
+    });
+
+    describe('#some(callback, scope?)', function() {
+        let queue = new Queue([2, 4, 6, 8]);
+        it(`should return true if the callback method returns true for at least one item in
+        the queue`, function() {
+            expect(queue.some(item => item >= 8)).to.be.true;
+            expect(queue.some(item => item === 2)).to.be.true;
+        });
+
+        it('should return false if callback method did not return true for any item in the queue', function() {
+            expect(queue.some(item => item > 8)).to.be.false;
+            expect(queue.some(item => item < 2)).to.be.false;
+        });
+
+        it('should throw TypeError if callback is not a function', function() {
+            expect(function() {
+                queue.some(null);
+            }).to.throw(TypeError);
+        });
+
+        it('should take an optional execution scope object as second parameter', function() {
+            let scopedCallCount = 0,
+                scope = {name: 'scoping'},
+                queue = new Queue([1, 2, 3, 4]);
+
+            queue.some(function() {
+                if (this === scope)
+                    scopedCallCount += 1;
+                return false;
+            }, scope);
+
+            expect(scopedCallCount).to.equals(4);
+        });
+
+        it('should return false for all tests on empty queue', function() {
+            queue.empty();
+            expect(queue.some(function() {return true;})).to.be.false;
+        });
+    });
+
+    describe('#map(callback, scope?)', function() {
+        let queue = new Queue([2, 4, 6, 8]);
+
+        it(`should return an array with the result of calling the provided callback on
+        every item in the queue`, function() {
+            expect(queue.map(item => item * 2)).to.deep.equals([4, 8, 12, 16]);
+            expect(queue.map(item => item * 0)).to.deep.equals([0, 0, 0, 0]);
+        });
+
+        it('should throw TypeError if callback is not a function', function() {
+            expect(function() {
+                queue.map(null);
+            }).to.throw(TypeError);
+        });
+
+        it('should take a callback execution scope object as a second optional parameter', function() {
+            let scope = {divisor: 2};
+            expect(queue.map(function(item) {
+                return item / this.divisor;
+            }, scope)).to.deep.equals([1, 2, 3, 4]);
+        });
+
+        it('should return empty array for all calls on empty queue', function() {
+            queue.empty();
+            expect(queue.map(function() {return true;})).to.deep.equals([]);
+        });
+    });
+
+    describe('#reduce(callback, initialValue?)', function() {
+        let queue = new Queue([2, 4, 6, 8]);
+
+        it(`should reduce the items in the queue to an accumulation by calling each item on
+        the given callback.`, function() {
+            expect(queue.reduce((accumulator, current) => accumulator + current)).to.equals(20);
+            expect(queue.reduce((accumulator, current) => accumulator * current)).to.equals(384);
+
+            expect(queue.reduce((accumulator, current) => accumulator + current, 20)).to.equals(40);
+            expect(queue.reduce((accumulator, current) => accumulator * current, 0)).to.equals(0);
+        });
+
+        it('should throw TypeError if callback is not a function', function() {
+            expect(function() {
+                queue.reduce(null);
+            }).to.throw(TypeError);
+        });
+
+        it('should throw TypeError if queue is empty and no initial value is provided', function() {
+            queue.empty();
+            expect(function() {
+                queue.reduce(function(accumulator, current) {
+                    return accumulator + current;
+                });
+            }).to.throw(TypeError);
+        });
+    });
+
+    describe('#filter(callback, scope?)', function() {
+        let queue = new Queue([2, 4, 6, 8]);
+
+        it(`should filter out a new queue containing items for which the callback method
+        returns true`, function() {
+            let filter = queue.filter(item => item > 4); //filter all items greater than 4
+            expect(filter.toArray()).to.deep.equals([6, 8]);
+        });
+
+        it(`should filter out a new queue with empty items if callback returns true for no
+        item`, function() {
+            let filter = queue.filter(item => item > 8); //filter all items greater than 8
+            expect(filter.toArray()).to.deep.equals([]);
+        });
+
+        it('should throw error if callback is not a function', function() {
+            expect(function() {
+                queue.filter({});
+            }).to.throw(TypeError);
+        });
+
+        it('should take an optional execution scope object as second parameter', function() {
+            let scopedCallCount = 0,
+                scope = {name: 'scoping'},
+                queue = new Queue([1, 2, 3, 4]);
+
+            queue.filter(function() {
+                if (this === scope)
+                    scopedCallCount += 1;
+                return false;
+            }, scope);
+
+            expect(scopedCallCount).to.equals(4);
+        });
+    });
 });
