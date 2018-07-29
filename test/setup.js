@@ -12,5 +12,6 @@ let dom = new JSDOM('<!doctype html><html><body></body></html>', {
  * set up test global variables including a test server to be used for http requests
 */
 global.expect = require('chai').expect;
+global.server = require('../server/app.js');
 global.window = dom.window;
 global.document = window.document;
