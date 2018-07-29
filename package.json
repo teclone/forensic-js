@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "commit": "git-cz",
-    "lint": "eslint ./src --fix",
+    "lint": "eslint ./src/** --fix",
     "test": "BABEL_ENV=test nyc mocha --recursive",
     "watch-test": "npm run test -- -w"
   },
@@ -28,7 +28,8 @@
     "istanbul": "0.4.5",
     "jsdom": "11.12.0",
     "mocha": "5.2.0",
-    "nyc": "12.0.2"
+    "nyc": "12.0.2",
+    "r-server": "1.0.1"
   },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
@@ -39,7 +40,7 @@
       "./test/setup.js"
     ],
     "include": [
-      "src/modules/*.js"
+      "src/modules/**/*.js"
     ]
   }
 }
