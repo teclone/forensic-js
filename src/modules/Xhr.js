@@ -136,6 +136,39 @@ let xhrStates = {
 
         xhrStates.iterationId = setTimeout(manage, xhrStates.pollAfter);
         xhrStates.started = true;
+    },
+
+    /**
+     * asynchronously execute a http request on the given url using a given http method verb.
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@param {string} [options.method] - http method verb to use
+     *@param {Object|FormData} [options.data] - an object literal or form data containing
+     * request data to send
+     *@param {Object} [options.headers] - an object of http headers to send
+     *@param {string} [options.responseType] - string denoting expected response mime type
+     *@param {string} [options.contentType] - string denoting request content type
+     *@param {string} [options.cache] - request cache directive, default, no-cache or reload
+     *@param {number} [options.timeout] - time in milliseconds to abort request
+     *@param {number} [options.priority] - request priority level. priority is higher in descending order
+     *@param {Function} [options.progress] - request onprogress event callback handler
+     *@param {string} [overrideMethod] - http method verb to use, overrides options method value
+     *@returns {Promise}
+    */
+    fetch = function(url, options, overrideMethod) {
+        options = Util.isPlainObject(options)? options : {};
+
+        options.globalHeaders = xhrStates.globalHeaders;
+        options.overrideMethod = overrideMethod;
+        options.timeoutAfter = xhrStates.timeoutAfter;
+
+        return new Promise((resolve, reject) => {
+            let request = new _Request(url, options, resolve, reject, Transport.create());
+            request.age = 0;
+            request.active = false;
+            xhrStates.pendingRequests.put(request);
+            start();
+        });
     };
 
 export default {
@@ -282,5 +315,17 @@ export default {
             this.removeHeader(headerName);
 
         return this;
+    },
+
+    /**
+     * asynchronously execute a http request on the given url using a given http method verb.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    fetch(url, options) {
+        return fetch(url, options);
     },
 };
