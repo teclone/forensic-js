@@ -16,6 +16,14 @@ function processProgressEvent(e) {
 */
 function processTimeoutEvent() {
     this.timedOut = true;
+    this._resolve(this);
+}
+
+/**
+ * processes load events
+*/
+function processLoadEvent() {
+    this._resolve(this);
 }
 
 /**
@@ -87,6 +95,7 @@ function send() {
     this.transport.open(this.method, url, true);
     this.transport.responseType = this.responseType;
 
+    this.transport.onload = Util.generateCallback(processLoadEvent, this);
     if (this.timeout) {
         this.transport.timeout = this.timeout;
         this.transport.ontimeout = Util.generateCallback(processTimeoutEvent, this);
@@ -105,8 +114,6 @@ export default class {
      *@param {Object} [options] - optional request configuration object
     */
     constructor(url, options, resolve, reject, transport) {
-
-        options = Util.isPlainObject(options)? options : {};
         this.method = typeof options.method === 'string'? options.method.toUpperCase() : 'GET';
 
         if (typeof options.overrideMethod === 'string')
@@ -156,9 +163,13 @@ export default class {
 
     /**
      * sends the request
+     *@returns {Promise}
     */
     send() {
-        send.call(this);
+        return new Promise((resolve) => {
+            this._resolve = resolve;
+            send.call(this);
+        });
     }
 
     /**
