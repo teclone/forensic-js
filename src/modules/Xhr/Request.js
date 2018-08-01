@@ -14,7 +14,7 @@ function processProgressEvent(e) {
 /**
  * processes timeout events
 */
-function processTimeoutEvent() {
+function onTimeout() {
     this.timedOut = true;
     this._resolve(this);
 }
@@ -22,7 +22,15 @@ function processTimeoutEvent() {
 /**
  * processes load events
 */
-function processLoadEvent() {
+function onAbort() {
+    this.aborted = true;
+    this._resolve(this);
+}
+
+/**
+ * processes load events
+*/
+function onLoad() {
     this._resolve(this);
 }
 
@@ -95,15 +103,19 @@ function send() {
     this.transport.open(this.method, url, true);
     this.transport.responseType = this.responseType;
 
-    this.transport.onload = Util.generateCallback(processLoadEvent, this);
+    this.transport.onload = Util.generateCallback(onLoad, this);
+    this.transport.onabort = Util.generateCallback(onAbort, this);
     if (this.timeout) {
         this.transport.timeout = this.timeout;
-        this.transport.ontimeout = Util.generateCallback(processTimeoutEvent, this);
+        this.transport.ontimeout = Util.generateCallback(onTimeout, this);
     }
+
     setRequestHeaders.call(this);
 
-    this.transport.send(data);
     this.timedOut = false;
+    this.aborted = false;
+
+    this.transport.send(data);
 }
 
 export default class {
@@ -173,11 +185,18 @@ export default class {
     }
 
     /**
+     * aborts the request
+    */
+    abort() {
+        this.transport.abort();
+    }
+
+    /**
      * returns the request state
      *@type {string}
     */
     get state() {
-        if (this.timedOut)
+        if (this.timedOut || this.aborted)
             return 'complete';
 
         let readyState = this.transport.readyState.toString();
