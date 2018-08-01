@@ -79,4 +79,37 @@ export default class {
     get statusMessage() {
         return this.transport.statusText;
     }
+
+    /**
+     * returns http response header by the entry name
+     *@memberof Response#
+     *@returns {string} returns string or null if such header was not sent
+    */
+    getHeader(name) {
+        name = name.toString();
+        return this.transport.getResponseHeader(name);
+    }
+
+    /**
+     * returns all response headers as an object
+     *@memberof Response#
+     *@param {boolean} [camelize=true] - boolean value indicating if the header keys should be
+     * turned into camel case to make it easy to the dot (.) operator. like headers.headerName
+     *@returns {Object}
+    */
+    getHeaders(camelize) {
+        if (this.headers === null) {
+            this.headers = {};
+            let headers = this.transport.getAllResponseHeaders().replace(/\n\r?$/, '').split(/\n\r?/);
+            for (let header of headers) {
+                let [name, value] = header.split(':');
+                this.headers[name.toLowerCase()] = value.trim();
+            }
+        }
+        camelize = typeof camelize !== 'undefined' && !camelize? false : true;
+        return !camelize? Object.assign({}, this.headers)  : Object.keys(this.headers).reduce((accumulator, key) => {
+            accumulator[Util.camelCase(key)] = this.headers[key];
+            return accumulator;
+        }, {});
+    }
 }
