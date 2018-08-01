@@ -318,13 +318,14 @@ describe('Request', function() {
         it(`should abort the request when called`, function() {
             let request = new Request('/', {}, () => {}, () => {}, transport);
 
-            setTimeout(function() {
-                request.abort();
-            }, 1);
-            return request.send().then((request) => {
+            let promise = request.send().then((request) => {
                 expect(request.aborted).to.equals(true);
                 expect(request.state).to.equals('complete');
             });
+
+            request.abort();
+
+            return promise;
         });
     });
 
