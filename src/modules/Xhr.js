@@ -7,6 +7,7 @@ import {install, uninstall} from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
 import Transport from './Xhr/Transport.js';
+import _Request from './Xhr/Request.js';
 import _Response from './Xhr/Response.js';
 
 /**
@@ -227,5 +228,59 @@ export default {
     */
     get ieString() {
         return Transport.ieString;
+    },
+
+    /**
+     * adds a http header to the global header object.
+     *
+     *@memberof Xhr
+     *@param {string} name - the header name
+     *@param {*} value - the header value
+     *@returns {this}
+    */
+    addHeader(name, value) {
+        name = name.toString().trim();
+        xhrStates.globalHeaders[name] = value;
+        return this;
+    },
+
+    /**
+     * adds http headers to the global header object.
+     *
+     *@memberof Xhr
+     *@param {Object} entries - the header entries
+     *@returns {this}
+    */
+    addHeaders(entries) {
+        for (const [name, value] of Object.entries(entries))
+            this.addHeader(name, value);
+        return this;
+    },
+
+    /**
+     * removes http header from the global header object.
+     *
+     *@memberof Xhr
+     *@param {string} headerName - global header to remove
+     *@returns {this}
+    */
+    removeHeader(headerName) {
+        headerName = headerName.toString().trim();
+        delete xhrStates.globalHeaders[headerName];
+        return this;
+    },
+
+    /**
+     * removes comma separated list of headers from the global header object.
+     *
+     *@memberof Xhr
+     *@param {...string} headerNames - comma separated list of headers to remove
+     *@returns {this}
+    */
+    removeHeaders(...headerNames) {
+        for (let headerName of headerNames)
+            this.removeHeader(headerName);
+
+        return this;
     },
 };
