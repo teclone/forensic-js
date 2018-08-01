@@ -328,4 +328,76 @@ export default {
     fetch(url, options) {
         return fetch(url, options);
     },
+
+    /**
+     * get data asynchronously from given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    get(url, options) {
+        return fetch(url, options, 'GET');
+    },
+
+    /**
+     * post data asynchronously to the given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    post(url, options) {
+        return fetch(url, options, 'POST');
+    },
+
+    /**
+     * put data asynchronously on the given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    put(url, options) {
+        return fetch(url, options, 'PUT');
+    },
+
+    /**
+     * delete data asynchronously on the given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    delete(url, options) {
+        return fetch(url, options, 'DELETE');
+    },
+
+    /**
+     * retrieve a resource meta headers from the given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    head(url, options) {
+        return fetch(url, options, 'HEAD');
+    },
+
+    /**
+     * retrieve resource permitted http communications method verbs from the given url.
+     *
+     *@memberof Xhr
+     *@param {string} url - the resource url
+     *@param {Object} [options] - optional request configuration object
+     *@returns {Promise}
+    */
+    options(url, options) {
+        return fetch(url, options, 'OPTIONS');
+    },
 };
