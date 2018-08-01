@@ -29,12 +29,6 @@ describe('Request', function() {
             expect(request).to.be.a('Request');
         });
 
-        it(`should create a request object with a default options if options argument is not a
-        plain object`, function() {
-            let request = new Request('/', null, () => {}, () => {}, transport);
-            expect(request.method).to.equals('GET');
-        });
-
         it(`should set the request method to the given options.method parameter. default value
         is GET`, function() {
             let request = new Request('/', {}, () => {}, () => {}, transport);
@@ -134,49 +128,33 @@ describe('Request', function() {
 
     describe('#send()', function() {
 
-        it(`should send the request when called`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'Hello World')
-                    done();
-                else
-                    done(new Error('request was not sent'));
-            };
+        it(`should send the request when called and return a promise`, function() {
             let request = new Request('/', {}, () => {}, () => {}, transport);
-            request.send();
+            expect(request.send()).to.be.a('Promise');
         });
 
         it(`should send the request, terminating the request if response time exceeds timeout
-        value`, function(done) {
+        value`, function() {
             let request = new Request('/prolong-response', {timeout: 1000}, () => {}, () => {}, transport);
-            request.send();
-            setTimeout(function() {
-                if (request.timedOut && request.state === 'complete')
-                    done();
-                else
-                    done(new Error('Failed to timeout request'));
-            }, 1200);
+            return request.send().then((request) => {
+                expect(request.timedOut).to.be.true;
+            });
         });
 
         it(`should send the request, watching for progress event if an options.progress callback
-        method is specified`, function(done) {
+        method is specified`, function() {
             let callCount = 0;
             let request = new Request('/', {progress: () => {
-                if (callCount === 0) {
-                    callCount += 1;
-                    done();
-                }
+                callCount += 1;
             }}, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then(() => {
+                expect(callCount).to.be.greaterThan(0);
+            });
         });
 
         it(`should ignore the contentType options and send the request when called,
-        sending data content as query parameters if method is neither post nor put`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === '{"name":"Harrison","age":"22"}')
-                    done();
-                else
-                    done(new Error(transport.responseText + ' does not match sent query'));
-            };
+        sending data content as query parameters if method is neither post nor put`, function() {
             let request = new Request('/report-query', {
                 method: 'GET',
                 data: {
@@ -184,35 +162,27 @@ describe('Request', function() {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('{"name":"Harrison","age":"22"}');
+            });
         });
 
         it(`should append the data to the existing query in the url if there is already an
-        existing query in the url`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === '{"name":"Harrison","age":"22"}')
-                    done();
-                else
-                    done(new Error(transport.responseText + ' does not match sent query'));
-            };
+        existing query in the url`, function() {
             let request = new Request('/report-query?name=Harrison', {
                 method: 'GET',
                 data: {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('{"name":"Harrison","age":"22"}');
+            });
         });
 
         it(`should send the request when called, sending form-urlencoded content to the server if the
         request method is post or put and request data is not a form-data and contentType header
-        is not set or is set as 'application/x-www-form-urlencoded'`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'application/x-www-form-urlencoded')
-                    done();
-                else
-                    done(new Error('request content-type header sent to server is invalid'));
-            };
+        is not set or is set as 'application/x-www-form-urlencoded'`, function() {
             let request = new Request('/report-header/content-type', {
                 method: 'post',
                 data: {
@@ -220,17 +190,13 @@ describe('Request', function() {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('application/x-www-form-urlencoded');
+            });
         });
 
         it(`should send the request when called, sending json content to the server if the
-        request method is post or put and contentType header is set as 'json'`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'application/json')
-                    done();
-                else
-                    done(new Error('request content-type header sent to server is invalid'));
-            };
+        request method is post or put and contentType header is set as 'json'`, function() {
             let request = new Request('/report-header/content-type', {
                 method: 'post',
                 contentType: 'json',
@@ -239,17 +205,14 @@ describe('Request', function() {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('application/json');
+            });
         });
 
         it(`should send the request when called, sending json content to the server if the
-        request method is post or put and contentType header is set as 'application/json'`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'application/json')
-                    done();
-                else
-                    done(new Error('request content-type header sent to server is invalid'));
-            };
+        request method is post or put and contentType header is set as 'application/json'`, function() {
             let request = new Request('/report-header/content-type', {
                 method: 'post',
                 contentType: 'application/json',
@@ -258,17 +221,14 @@ describe('Request', function() {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('application/json');
+            });
         });
 
         it(`should send the request when called, sending json content to the server if the
-        request method is post or put and contentType header is set as 'text/json'`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'application/json')
-                    done();
-                else
-                    done(new Error('request content-type header sent to server is invalid'));
-            };
+        request method is post or put and contentType header is set as 'text/json'`, function() {
             let request = new Request('/report-header/content-type', {
                 method: 'post',
                 contentType: 'text/json',
@@ -277,17 +237,14 @@ describe('Request', function() {
                     age: 22
                 }
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('application/json');
+            });
         });
 
         it(`should send the request when called, sending multipart/form-data with boundary token
-         to the server if request method is post or put and request data is a form data`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText.indexOf('multipart/form-data') > -1)
-                    done();
-                else
-                    done(new Error(transport.responseText + ' content-type header sent to server is invalid'));
-            };
+         to the server if request method is post or put and request data is a form data`, function() {
             let formData = new window.FormData();
             formData.append('name', 'Harrison');
 
@@ -295,77 +252,64 @@ describe('Request', function() {
                 method: 'post',
                 data: formData
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.satisfy((text) => {
+                    return text.indexOf('multipart/form-data') > -1;
+                });
+            });
         });
 
         it(`should send the request when called, sending the appropriate cache-control header
-        for the given 'no-store' options.cache value`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'no-store')
-                    done();
-                else
-                    done(new Error('request cache-control header sent to server is invalid'));
-            };
+        for the given 'no-store' options.cache value`, function() {
             let request = new Request('/report-header/cache-control', {
                 cache: 'no-store'
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('no-store');
+            });
         });
 
         it(`should send the request when called, sending the appropriate cache-control header
-        for the given 'reload' options.cache value`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'no-cache')
-                    done();
-                else
-                    done(new Error('request cache-control header sent to server is invalid'));
-            };
+        for the given 'reload' options.cache value`, function() {
             let request = new Request('/report-header/cache-control', {
                 cache: 'reload'
             }, () => {}, () => {}, transport);
-            request.send();
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('no-cache');
+            });
         });
 
         it(`should send the request when called, sending the appropriate cache-control header
-        for the given 'no-cache' options.cache value`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'no-cache')
-                    done();
-                else
-                    done(new Error('request cache-control header sent to server is invalid'));
-            };
+        for the given 'no-cache' options.cache value`, function() {
             let request = new Request('/report-header/cache-control', {
                 cache: 'no-cache'
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('no-cache');
+            });
         });
 
         it(`should send the request when called, sending the appropriate cache-control header
-        for the given 'force-cache' options.cache value`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'max-stale')
-                    done();
-                else
-                    done(new Error('request cache-control header sent to server is invalid'));
-            };
+        for the given 'force-cache' options.cache value`, function() {
             let request = new Request('/report-header/cache-control', {
                 cache: 'force-cache'
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('max-stale');
+            });
         });
 
         it(`should send the request when called, sending the appropriate cache-control header
-        for the given 'only-if-cached' options.cache value`, function(done) {
-            transport.onload = () => {
-                if (transport.responseText === 'only-if-cached')
-                    done();
-                else
-                    done(new Error('request cache-control header sent to server is invalid'));
-            };
+        for the given 'only-if-cached' options.cache value`, function() {
             let request = new Request('/report-header/cache-control', {
                 cache: 'only-if-cached'
             }, () => {}, () => {}, transport);
-            request.send();
+
+            return request.send().then((request) => {
+                expect(request.transport.responseText).to.equals('only-if-cached');
+            });
         });
     });
 
@@ -377,18 +321,11 @@ describe('Request', function() {
         });
 
         it(`should be updated as the request gets sent, progressing and finally gets to the
-        complete state`, function(done) {
+        complete state`, function() {
             let request = new Request('/', {}, () => {}, () => {}, transport);
-            request.send();
-
-            let checkState = () => {
-                if (request.state === 'complete')
-                    done();
-                else
-                    setTimeout(checkState, 50);
-            };
-
-            setTimeout(checkState, 50);
+            return request.send().then((request) => {
+                expect(request.state).to.equals('complete');
+            });
         });
     });
 });
