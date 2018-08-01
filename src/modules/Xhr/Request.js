@@ -101,7 +101,9 @@ function send() {
         this.transport.onprogress = Util.generateCallback(processProgressEvent, this);
 
     this.transport.open(this.method, url, true);
+
     this.transport.responseType = this.responseType;
+    this.transport.withCredentials = this.withCredentials;
 
     this.transport.onload = Util.generateCallback(onLoad, this);
     this.transport.onabort = Util.generateCallback(onAbort, this);
@@ -123,7 +125,20 @@ export default class {
     /**
      * creates a request object
      *@param {string} url - the resource url
-     *@param {Object} [options] - optional request configuration object
+     *@param {Object} options - optional request configuration object
+     *@param {string} [options.method] - http method verb to use
+     *@param {Object|FormData} [options.data] - an object literal or form data containing
+     * request data to send
+     *@param {Object} [options.headers] - an object of http headers to send
+     *@param {string} [options.responseType] - string denoting expected response mime type
+     *@param {string} [options.contentType] - string denoting request content type
+     *@param {boolean} [options.withCredentials] - boolean value indicating if credentials are
+     * are allowed for cross origin requests
+     *@param {string} [options.cache] - request cache directive, default, no-cache or reload
+     *@param {number} [options.timeout] - time in milliseconds to abort request
+     *@param {number} [options.priority] - request priority level. priority is higher in descending order
+     *@param {Function} [options.progress] - request onprogress event callback handler
+     *@param {string} [overrideMethod] - http method verb to use, overrides options method value
     */
     constructor(url, options, resolve, reject, transport) {
         this.method = typeof options.method === 'string'? options.method.toUpperCase() : 'GET';
@@ -145,6 +160,7 @@ export default class {
 
         //resolve request content type
         this.responseType = typeof options.responseType === 'string'? options.responseType : '';
+        this.withCredentials = options.withCredentials? true : false;
         this.contentType = '';
 
         if (this.method === 'POST' || this.method === 'PUT') {
