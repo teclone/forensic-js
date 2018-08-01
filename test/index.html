@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Browser Tests - ForensicJS</title>
+        <link href="https://unpkg.com/mocha@4.0.1/mocha.css" rel="stylesheet" />
+        <script src="https://unpkg.com/mocha@4.0.1/mocha.js"></script>
+        <script src="https://unpkg.com/chai@4.1.2/chai.js"></script>
+    </head>
+    <body>
+        <div id="mocha"></div>
+        <script type="module">
+            window.expect = chai.expect;
+            mocha.setup('bdd');
+            window.getInstance = function(className, ...parameters) {
+                return new className(...parameters);
+            };
+        </script>
+        <script type="module">
+            import './test/modules/Globals.spec.js';
+            import './test/modules/Util.spec.js';
+            import './test/modules/Queue.spec.js';
+            import './test/modules/Xhr/Transport.spec.js';
+            import './test/modules/Xhr/Request.spec.js';
+            import './test/modules/Xhr/Response.spec.js';
+            import './test/modules/Xhr.spec.js';
+
+            mocha.checkLeaks();
+            mocha.run();
+        </script>
+    </body>
+</html>
