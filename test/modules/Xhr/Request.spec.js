@@ -80,6 +80,12 @@ describe('Request', function() {
             expect(request.progress).to.equals(progress);
         });
 
+        it(`should set the request withCredentials to the given options.withCredentials boolean
+         parameter if given. default value is false`, function() {
+            let request = new Request('/', {withCredentials: true}, () => {}, () => {}, transport);
+            expect(request.withCredentials).to.equals(true);
+        });
+
         it(`should set the request contentType to the given options.contentType parameter when
         the request method is post or put. default value for post or put requests is
         'application/x-www-form-urlencoded'`, function() {
