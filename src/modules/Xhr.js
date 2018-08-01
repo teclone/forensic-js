@@ -142,17 +142,6 @@ let xhrStates = {
      * asynchronously execute a http request on the given url using a given http method verb.
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
-     *@param {string} [options.method] - http method verb to use
-     *@param {Object|FormData} [options.data] - an object literal or form data containing
-     * request data to send
-     *@param {Object} [options.headers] - an object of http headers to send
-     *@param {string} [options.responseType] - string denoting expected response mime type
-     *@param {string} [options.contentType] - string denoting request content type
-     *@param {string} [options.cache] - request cache directive, default, no-cache or reload
-     *@param {number} [options.timeout] - time in milliseconds to abort request
-     *@param {number} [options.priority] - request priority level. priority is higher in descending order
-     *@param {Function} [options.progress] - request onprogress event callback handler
-     *@param {string} [overrideMethod] - http method verb to use, overrides options method value
      *@returns {Promise}
     */
     fetch = function(url, options, overrideMethod) {
