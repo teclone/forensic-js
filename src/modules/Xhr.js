@@ -3,7 +3,10 @@
  * request headers and lots more
  *@module Xhr
 */
+import {install, uninstall} from './Globals.js';
+import Util from './Util.js';
 import Queue from './Queue.js';
+import Transport from './Xhr/Transport.js';
 import _Response from './Xhr/Response.js';
 
 /**
@@ -133,3 +136,96 @@ let xhrStates = {
         xhrStates.iterationId = setTimeout(manage, xhrStates.pollAfter);
         xhrStates.started = true;
     };
+
+export default {
+
+    /**
+     * calls the Globals install method with the parameters. This is useful when using the
+     * Utils module as a standalone distribution or lib.
+     *
+     *@param {Object} hostParam - the host object, the global this object in a given usage
+     * environment
+     *@param {Object} rootParam - the root object. an example is the document object
+     *@returns {boolean}
+    */
+    install(hostParam, rootParam) {
+        return install(hostParam, rootParam);
+    },
+
+    /**
+     * calls the Globals uninstall method with the parameters. This is useful when using the
+     * Utils module as a standalone distribution or lib.
+     *
+     *@returns {boolean}
+    */
+    uninstall() {
+        return uninstall();
+    },
+
+    /**
+     * sets default request timeout or retrieves the default timeout value
+     * the default timeout value is 15 seconds which is 15000 ms
+     *@memberof Xhr
+     *@param {number} [ms] - time in milliseconds after which to timeout request
+     *@returns {*}
+    */
+    timeoutAfter(ms) {
+        if (!Util.isNumber(ms))
+            return xhrStates.timeoutAfter;
+
+        xhrStates.timeoutAfter = ms;
+        return this;
+    },
+
+    /**
+     * sets the polling time or retrieves the poll time value.
+     * The default value is 250ms
+     *@memberof Xhr
+     *@param {number} [ms] - time in milliseconds after which to poll requests repeatedly
+     *@returns {*}
+    */
+    pollAfter(ms) {
+        if (!Util.isNumber(ms))
+            return xhrStates.pollAfter;
+
+        xhrStates.pollAfter = ms;
+        return this;
+    },
+
+    /**
+     * sets time after which a pending request priority is promoted one value up or returns
+     * the value if called with no ms argument.
+     * The default value is 3000ms
+     *@memberof Xhr
+     *@param {number} ms - time in milliseconds after which to promote a request's priority
+     *@returns {*}
+    */
+    promoteAfter(ms) {
+        if (!Util.isNumber(ms))
+            return xhrStates.promoteAfter;
+
+        xhrStates.promoteAfter = ms;
+        return this;
+    },
+
+    /**
+     * indicates if xml http request is supported
+     *
+     *@memberof Xhr
+     *@type {boolean}
+    */
+    get supported() {
+        return Transport.supported;
+    },
+
+    /**
+     * contains the  ActiveXObject MSXML version string used in creating xhr transport.
+     * Its value will be empty if created through the XMLHttpRequest construct
+     *
+     *@memberof Xhr
+     *@type {string}
+    */
+    get ieString() {
+        return Transport.ieString;
+    },
+};
