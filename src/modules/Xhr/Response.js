@@ -45,4 +45,38 @@ export default class {
     get [Symbol.toStringTag]() {
         return 'Response';
     }
+
+    /**
+     * boolean indicating if request status is within the 200 range
+     *@memberof Response#
+     *@type {boolean}
+    */
+    get ok() {
+        if (this.status === 304)
+            return true;
+
+        else if (this.status >= 200 && this.status < 300)
+            return true;
+
+        else
+            return false;
+    }
+
+    /**
+     * response status code
+     *@memberof Response#
+     *@type {number}
+    */
+    get statusCode() {
+        return this.status;
+    }
+
+    /**
+     * response status message
+     *@memberof Response#
+     *@type {string}
+    */
+    get statusMessage() {
+        return this.transport.statusText;
+    }
 }
