@@ -112,4 +112,49 @@ export default class {
             return accumulator;
         }, {});
     }
+
+    /**
+     * returns response as json object.
+     *@memberof Response#
+     *@returns {JSON}
+    */
+    json() {
+        return this._json;
+    }
+
+    /**
+     * returns response as blob
+     *@memberof Response#
+     *@returns {Blob}
+    */
+    blob() {
+        return this.transport.response;
+    }
+
+    /**
+     * returns response as array buffer
+     *@memberof Response#
+     *@returns {ArrayBuffer}
+    */
+    arrayBuffer() {
+        return this.transport.response;
+    }
+
+    /**
+     * returns response parsed xml or html document
+     *@memberof Response#
+     *@returns {Document}
+    */
+    document() {
+        return this.transport.response;
+    }
+
+    /**
+     * returns response text
+     *@memberof Response#
+     *@returns {string}
+    */
+    text() {
+        return this.transport.responseText;
+    }
 }
