@@ -6,9 +6,9 @@
 import {install, uninstall} from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
-import Transport from './Xhr/Transport.js';
-import _Request from './Xhr/Request.js';
-import _Response from './Xhr/Response.js';
+import Transport from './XhrComponents/Transport.js';
+import _Request from './XhrComponents/Request.js';
+import _Response from './XhrComponents/Response.js';
 
 /**
  *@name xhrStates

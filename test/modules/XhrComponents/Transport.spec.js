@@ -1,6 +1,6 @@
-import Transport from '../../../src/modules/Xhr/Transport.js';
+import Transport from '../../../src/modules/XhrComponents/Transport.js';
 
-describe('Transport', function() {
+describe('XhrComponents.Transport', function() {
     describe('.create()', function() {
         it(`should create an xhr transport object`, function() {
             expect(Transport.create()).to.be.an('XMLHttpRequest');

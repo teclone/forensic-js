@@ -1,3 +1,6 @@
+/**
+ *@namespace XhrComponents
+*/
 import {host, onInstall} from '../Globals.js';
 
 let ieString = '',
@@ -59,6 +62,9 @@ let ieString = '',
 
 onInstall(createTransport);
 
+/**
+ *@memberof XhrComponents
+*/
 export default {
 
     /**

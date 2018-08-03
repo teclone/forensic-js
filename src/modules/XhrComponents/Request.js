@@ -1,3 +1,6 @@
+/**
+ *@namespace XhrComponents
+*/
 import Util from '../Util.js';
 import { host } from '../Globals.js';
 
@@ -120,6 +123,9 @@ function send() {
     this.transport.send(data);
 }
 
+/**
+ *@memberof XhrComponents
+*/
 export default class {
 
     /**

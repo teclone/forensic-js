@@ -1,3 +1,6 @@
+/**
+ *@namespace XhrComponents
+*/
 import Util from '../Util.js';
 
 /**
@@ -19,6 +22,9 @@ function parseJSON(transport) {
     return json;
 }
 
+/**
+ *@memberof XhrComponents
+*/
 export default class {
     /**
      * creates a response object
