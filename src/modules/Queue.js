@@ -117,7 +117,9 @@ export default class Queue {
         //sort and search using different criteria
         this.alternateFnSearchs = {}; // alternate search functions compliments the sort functions
 
-        this.push(...Util.makeArray(items));
+        Util.makeArray(items).forEach((item) => {
+            this.push(item);
+        });
     }
 
     /**
