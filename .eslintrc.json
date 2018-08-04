@@ -8,7 +8,8 @@
     },
     "globals": {
         "expect": true,
-        "server": true
+        "server": true,
+        "getInstance": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
