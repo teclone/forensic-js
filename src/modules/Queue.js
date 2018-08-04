@@ -549,17 +549,25 @@ export default class Queue {
             throw new TypeError('argument one is not a function');
 
         scope = Util.isObject(scope)? scope : this;
-        let index = -1,
-            iLocation = 1 + parameters.length,
-            array = [null, ...parameters, 0, this],
-            runner = Util.generateCallback(callback, scope, array);
 
-        for (let value of this) {
-            array[0] = value;
-            array[iLocation] = ++index;
+        let iLocation = 1 + parameters.length,
+            array = [null, ...parameters, 0, this],
+
+            runner = Util.generateCallback(callback, scope, array),
+
+            iterator = this[Symbol.iterator](),
+            iteratorResult = iterator.next();
+
+        while (!iteratorResult.done) {
+            array[0] = iteratorResult.value;
+            array[iLocation] = iteratorResult.index;
+
             if (runner() !== undefined)
                 break;
+
+            iteratorResult = iterator.next();
         }
+
         return this;
     }
 
