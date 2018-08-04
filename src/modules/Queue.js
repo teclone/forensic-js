@@ -149,16 +149,17 @@ export default class Queue {
      *@private
     */
     [Symbol.iterator]() {
-        let items = this.items, index = 0, length = items.length;
+        let items = this.items, index = -1, length = items.length;
         return {
             next() {
+                let currentLength = items.length;
                 //check if some items have been deleted
-                if (items.length < length) {
-                    index -= length - items.length;
-                    length = items.length;
+                if (currentLength < length) {
+                    index -= length - currentLength;
+                    length = currentLength;
                 }
-                if(index < length)
-                    return {done: false, value: items[index], index: index++};
+                if(++index < length)
+                    return {done: false, value: items[index], index: index};
                 else
                     return {done: true, value: undefined, index: undefined};
             }
@@ -538,22 +539,24 @@ export default class Queue {
      * any additional parameters will be passed in between the item, and index parameter.
      * the callback should returned anything other than undefined to stop the iteration
      *@param {Object} [scope=this] - execution scope object
-     *@param {...*} [parameters] - comma separated list of extra item parameters to pass to callback
+     *@param {...*} [parameters] - comma separated list of extra items parameters to pass to callback
      *@throws {Error} throws error if argument one is not a function
     */
     forEach(callback, scope, ...parameters) {
         if(!Util.isCallable(callback))
             throw new TypeError('argument one is not a function');
 
-        let iterable = this[Symbol.iterator](),
-            iteratorResult = iterable.next();
         scope = Util.isObject(scope)? scope : this;
+        let index = -1,
+            iLocation = 1 + parameters.length,
+            array = [null, ...parameters, 0, this],
+            runner = Util.generateCallback(callback, scope, array);
 
-        while(!iteratorResult.done) {
-            if (Util.runSafe(callback, scope, [iteratorResult.value, ...parameters,
-                iteratorResult.index, this]) !== undefined)
+        for (let value of this) {
+            array[0] = value;
+            array[iLocation] = ++index;
+            if (runner() !== undefined)
                 break;
-            iteratorResult = iterable.next();
         }
         return this;
     }
