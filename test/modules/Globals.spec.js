@@ -75,7 +75,7 @@ describe('Globals', function() {
 
         it('should reflect the host object immediately after library globals are intalled', function() {
             Globals.install(window, document);
-            expect(Globals.host).to.be.equals(window);
+            expect(Globals.host).to.equals(window);
         });
 
         it('should be null immediately after library globals are uninstalled', function() {
@@ -94,7 +94,7 @@ describe('Globals', function() {
 
         it('should reflect the root object immediately after library globals are intalled', function() {
             Globals.install(window, document);
-            expect(Globals.root).to.be.equals(document);
+            expect(Globals.root).to.equals(document);
         });
 
         it('should be null immediately after library globals are uninstalled', function() {

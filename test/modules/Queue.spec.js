@@ -463,7 +463,7 @@ describe('Queue module', function() {
     describe('#pop()', function() {
         it('should remove and return the last item in the queue', function() {
             let queue = new Queue([1, 2, 3, 4], false);
-            expect(queue.pop()).to.be.equals(4);
+            expect(queue.pop()).to.equals(4);
             expect(queue.length).to.equals(3);
         });
         it('should return undefined for all calls on empty queue', function() {
@@ -487,7 +487,7 @@ describe('Queue module', function() {
     describe('#last()', function() {
         it('should return the last item in the queue without removing it', function() {
             let queue = new Queue([1, 2, 3, 4], false);
-            expect(queue.last()).to.be.equals(4);
+            expect(queue.last()).to.equals(4);
             expect(queue.length).to.equals(4);
         });
         it('should return undefined for all calls on empty queue', function() {
@@ -596,7 +596,7 @@ describe('Queue module', function() {
             });
 
             it('should return -1 if item with given criteria is not found', function() {
-                expect(queue.indexOf(4)).to.be.equals(-1);
+                expect(queue.indexOf(4)).to.equals(-1);
             });
 
             it('should throw error if there is no sort or search function defined for the given criteria', function() {
@@ -718,7 +718,7 @@ describe('Queue module', function() {
                 sumOfItems += item;
             });
 
-            expect(sumOfItems).to.be.equals(20);
+            expect(sumOfItems).to.equals(20);
         });
 
         it(`should exit the iteration once the method returns anything that is not undefined`, function() {
