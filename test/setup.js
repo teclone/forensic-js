@@ -15,3 +15,21 @@ global.expect = require('chai').expect;
 global.server = require('../server/app.js');
 global.window = dom.window;
 global.document = window.document;
+
+/**
+ * a workaround to istanbul's branching error on constructors that extends other constructors.
+*/
+global.getInstance = function(className, ...parameters) {
+    let proto = className.__proto__;
+
+    className.__proto__ = null;
+    try {
+        new className(...parameters);
+    }
+    catch(ex) {
+        //
+    }
+
+    className.__proto__ = proto;
+    return new className(...parameters);
+};
