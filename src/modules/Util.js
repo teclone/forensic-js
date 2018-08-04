@@ -262,14 +262,14 @@ export default {
     */
     runSafe(executable, scope, parameters, runAfter) {
         let callback = this.generateCallback(executable, scope, parameters);
-        if (runAfter) {
+        if (runAfter)
             return new Promise(function(resolve) {
                 setTimeout(() => {
                     resolve(callback()); // pass in the return value to the resolve method
                 }, runAfter);
             });
-        }
-        return callback();
+        else
+            return callback();
     },
 
     /**
