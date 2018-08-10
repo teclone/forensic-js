@@ -1,6 +1,6 @@
-import Driver from '../../../src/modules/EventDrivers/Driver.js';
+import Driver from '../../../../src/modules/Event/Drivers/Driver.js';
 
-describe('EventDrivers.Driver', function() {
+describe('Event.Drivers.Driver', function() {
 
     let target = null,
         event = null,
@@ -210,9 +210,11 @@ describe('EventDrivers.Driver', function() {
             expect(driver.defaultPrevented).to.be.true;
         });
 
-        it(`should log error message if called to prevent default inside a passive listener`, function() {
+        it(`should throw error if called to prevent default inside a passive listener`, function() {
             driver.passive = true;
-            driver.preventDefault();
+            expect(function() {
+                driver.preventDefault();
+            }).to.throw(Error);
         });
     });
 

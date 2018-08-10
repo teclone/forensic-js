@@ -1,7 +1,7 @@
-import CustomDriver from '../../../src/modules/EventDrivers/CustomDriver.js';
-import Driver from '../../../src/modules/EventDrivers/Driver.js';
+import CustomDriver from '../../../../src/modules/Event/Drivers/CustomDriver.js';
+import Driver from '../../../../src/modules/Event/Drivers/Driver.js';
 
-describe('EventDrivers.CustomDriver', function() {
+describe('Event.Drivers.CustomDriver', function() {
 
     let target = null,
         event = null,

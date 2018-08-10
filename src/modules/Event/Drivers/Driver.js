@@ -4,13 +4,13 @@
 
 /**
  * event initialization options.
- *@typedef {Object} eventInit
- *@property {boolean} [eventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [eventInit.cancelable=false] - boolean value indicating if event is
+ *@typedef {Object} EventInit
+ *@property {boolean} [EventInit.bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [EventInit.cancelable=false] - boolean value indicating if event is
  * cancelable
 */
-import {host} from '../Globals.js';
-import Util from '../Util.js';
+import {createDOMEvent} from '../../Globals.js';
+import Util from '../../Util.js';
 
 /**
  * base event driver class
@@ -37,25 +37,36 @@ export default class Driver {
     }
 
     /**
+     *@type {Array}
+    */
+    static get eventInitKeys() {
+        return ['bubbles', 'cancelable'];
+    }
+
+    /**
      * initializes the event according to the Event interface eventInit requirement
      *@param {Object} storeIn - object in which to store initializations
-     *@param {eventInit} getFrom - event initialization objects
+     *@param {EventInit} getFrom - event initialization objects
      *@returns {Object}
     */
     static initEvent(storeIn, getFrom) {
-        storeIn.bubbles = typeof getFrom.bubbles !== 'undefined' && !getFrom.bubbles? false : true;
-        storeIn.cancelable = typeof getFrom.cancelable !== 'undefined' && !getFrom.cancelable? false : true;
+        storeIn.bubbles = typeof getFrom.bubbles !== 'undefined' && !getFrom.bubbles?
+            false : true;
+        storeIn.cancelable = typeof getFrom.cancelable !== 'undefined' && !getFrom.cancelable?
+            false : true;
         return storeIn;
     }
 
     /**
      * creates an Event object that can be dispatched to an event target
      *@param {string} type - the event type
-     *@param {eventInit} eventInit - event initialization object
+     *@param {EventInit} eventInit - event initialization object
      *@returns {Event}
     */
     static create(type, eventInit) {
-        return new host.Event(type, this.initEvent({}, eventInit));
+        return createDOMEvent(
+            'Event', type, this.initEvent({}, eventInit), this.eventInitKeys
+        );
     }
 
     /**
@@ -208,7 +219,7 @@ export default class Driver {
     */
     preventDefault() {
         if (this.passive)
-            console.error('Unable to preventDefault inside passive event listener');
+            throw new Error('can\'t call preventDefault inside passive event listener');
 
         else if (!this.defaultPrevented)
             this.event.preventDefault();
