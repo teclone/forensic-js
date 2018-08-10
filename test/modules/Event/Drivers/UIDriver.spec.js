@@ -1,7 +1,7 @@
-import UIDriver from '../../../src/modules/EventDrivers/UIDriver.js';
-import Driver from '../../../src/modules/EventDrivers/Driver.js';
+import UIDriver from '../../../../src/modules/Event/Drivers/UIDriver.js';
+import Driver from '../../../../src/modules/Event/Drivers/Driver.js';
 
-describe('EventDrivers.UIDriver', function() {
+describe('Event.Drivers.UIDriver', function() {
 
     let target = null,
         event = null,

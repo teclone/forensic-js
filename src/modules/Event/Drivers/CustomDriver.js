@@ -4,12 +4,13 @@
 
 /**
  * event initialization options.
- *@typedef {Object} eventInit
- *@property {boolean} [eventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [eventInit.cancelable=false] - boolean value indicating if event is
+ *@typedef {Object} EventInit
+ *@property {boolean} [EventInit.bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [EventInit.cancelable=false] - boolean value indicating if event is
  * cancelable
+ *@property {mixed} [EventInit.detail=null] - the custom event detail
 */
-import {host} from '../Globals.js';
+import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
 
 /**
@@ -27,10 +28,21 @@ export default class CustomDriver extends Driver {
     }
 
     /**
+     * event init keys
+     *@type {Array}
+    */
+    static get eventInitKeys() {
+        let keys = Driver.eventInitKeys;
+
+        keys.push('detail');
+        return keys;
+    }
+
+    /**
      * initializes the event according to the CustomEvent interface eventInit requirement
      *@param {Object} storeIn - object in which to store initializations
-     *@param {eventInit} getFrom - event initialization objects
-     *@param {*} [detail=null] - custom event data
+     *@param {EventInit} getFrom - event initialization objects
+     *@param {mixed} [detail=null] - the custom event data
      *@returns {Object}
     */
     static initEvent(storeIn, getFrom, detail) {
@@ -42,16 +54,18 @@ export default class CustomDriver extends Driver {
     /**
      * creates a CustomEvent object that can be dispatched to an event target
      *@param {string} type - the event type
-     *@param {eventInit} eventInit - event initialization object
-     *@param {*} [detail=null] - custom event data
+     *@param {EventInit} eventInit - event initialization object
+     *@param {mixed} [detail=null] - the custom event data
      *@returns {CustomEvent}
     */
     static create(type, eventInit, detail) {
-        return new host.CustomEvent(type, this.initEvent({}, eventInit, detail));
+        return createDOMEvent(
+            'CustomEvent', type, this.initEvent({}, eventInit, detail), this.eventInitKeys
+        );
     }
 
     /**
-     *@param {Event} event - the dispatched event object
+     *@param {CustomEvent} event - the dispatched event object
     */
     constructor(event) {
         super(event);
