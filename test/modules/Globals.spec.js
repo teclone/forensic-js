@@ -167,4 +167,20 @@ describe('Globals', function() {
             expect(Globals.browserPrefixes).to.be.an('array');
         });
     });
+
+    describe('.createDOMEvent(Constructor, type, eventInit, eventInitKeys)', function() {
+        it('should create the event when called', function() {
+            let event = Globals.createDOMEvent('Event', 'submit', {
+                bubbles: true, cancelable: true}, ['bubbles', 'cancelable']);
+
+            expect(event).to.be.an('Event');
+        });
+
+        it('should return null if the event Constructor is not found', function() {
+            let event = Globals.createDOMEvent('AnimationEven', 'submit', {
+                bubbles: true, cancelable: true}, ['bubbles', 'cancelable']);
+
+            expect(event).to.equals(null);
+        });
+    });
 });
