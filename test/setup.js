@@ -30,6 +30,6 @@ global.getInstance = function(className, ...parameters) {
         //
     }
 
-    className.__proto__ = proto;
+    Object.setPrototypeOf(className, proto);
     return new className(...parameters);
 };
