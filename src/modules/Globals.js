@@ -139,6 +139,45 @@ export let uninstall = function() {
 };
 
 /**
+ * creates a dom event using either dom level 4 standard way or falls
+ * back to dom level 3 way
+ *@param {string} eventInterface - the event interface constructor name
+ *@param {string} type - the event type to create
+ *@param {Object} eventInit - the event intialization object
+ *@param {Array} eventInitKeys - the event initialization keys to use when falling back
+ * to dom level 3 EventInterface.initEventInterface() standard
+ *@returns {Event|null}
+*/
+export let createDOMEvent = function(eventInterface, type, eventInit, eventInitKeys) {
+    //check if event is constructible
+    try {
+        return new host[eventInterface](type, eventInit);
+    }
+    catch(ex){
+        //
+    }
+
+    //check if event can be created using document.createEvent
+    let eventInitArray = eventInitKeys? eventInitKeys.map((key) => {
+        return eventInit[key];
+    }) : [];
+
+    try {
+        let event = root.createEvent(eventInterface);
+        /* istanbul ignore next */
+        event['init' + eventInterface](type, ...eventInitArray);
+        /* istanbul ignore next */
+        return event;
+    }
+    catch(ex) {
+        //
+    }
+
+    //event is not supported.
+    return null;
+};
+
+/**
  * contains browser vendor prefixes
  *@memberof Globals
  *@type {string[]}
