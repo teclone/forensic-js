@@ -11,6 +11,7 @@ import CustomDriver from './Event/Drivers/CustomDriver.js';
 import CompositionDriver from './Event/Drivers/CompositionDriver.js';
 import HashChangeDriver from './Event/Drivers/HashChangeDriver.js';
 import PageTransitionDriver from './Event/Drivers/PageTransitionDriver.js';
+import PopStateDriver from './Event/Drivers/PopStateDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -65,6 +66,12 @@ const EVENT_DRIVERS = [
     {
         name: 'PageTransitionDriver',
         events: new Queue(PageTransitionDriver.events, true, true)
+    },
+
+    //PopState Driver interface
+    {
+        name: 'PopStateDriver',
+        events: new Queue(PopStateDriver.events, true, true)
     }
 ];
 
