@@ -1,8 +1,61 @@
 import { install, uninstall, host, root, onInstall } from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
+import Driver from './Event/Drivers/Driver.js';
+import UIDriver from './Event/Drivers/UIDriver.js';
+import FocusDriver from './Event/Drivers/FocusDriver.js';
+import MouseDriver from './Event/Drivers/MouseDriver.js';
+import TransitionDriver from './Event/Drivers/TransitionDriver.js';
+import AnimationDriver from './Event/Drivers/AnimationDriver.js';
+import CustomDriver from './Event/Drivers/CustomDriver.js';
+
+const EVENT_DRIVERS = [
+    // Driver interface
+    {
+        name: 'Driver',
+        events: new Queue(Driver.events, true, true),
+    },
+
+    //Transition Driver interface
+    {
+        name: 'TransitionDriver',
+        events: new Queue(null, true, true)
+    },
+
+    //Animation Driver interface
+    {
+        name: 'AnimationDriver',
+        events: new Queue(null, true, true)
+    },
+
+    //UI Driver interface
+    {
+        name: 'UIDriver',
+        events: new Queue(UIDriver.events, true, true)
+    },
+
+    //Focus Driver interface
+    {
+        name: 'FocusDriver',
+        events: new Queue(FocusDriver.events, true, true)
+    },
+
+    //Mouse Driver interface
+    {
+        name: 'MouseDriver',
+        events: new Queue(MouseDriver.events, true, true)
+    }
+];
 
 let
+    /*
+     *event driver classes
+    */
+    driverClasses = {
+        Driver, CustomDriver, UIDriver, FocusDriver, MouseDriver, TransitionDriver,
+        AnimationDriver
+    },
+
     /**
      * sorting function for event listeners
      *@param {Object} listener1 - the first listener object item
@@ -125,10 +178,67 @@ let
     },
 
     /**
+     * constructs an event configuration object
+     *@param {Object} config - the event config
+     *@param {boolean} deep - boolean value indicating if the construct should be deep, if it should
+     * include runOnce, capture and acceptBubbledEvents, bindPassive
+     *@returns {Object}
+    */
+    constructConfig = function(config, deep) {
+        config = Util.isPlainObject(config)? config : {};
+
+        let xConfig = {
+            runFirst: config.runFirst? 1 : 0,
+            runLast: config.runLast? 1 : 0,
+            priority: Util.isNumber(config.priority)? config.priority : 5
+        };
+
+        if (deep) {
+            xConfig.acceptBubbledEvents = typeof config.acceptBubbledEvents !== 'undefined' &&
+                !config.acceptBubbledEvents? false : true;
+            xConfig.passive = config.passive? true : false;
+            xConfig.runOnce = config.runOnce? true : false;
+            xConfig.capture = config.capture? true : false;
+        }
+        return xConfig;
+    },
+
+    /**
+     * constructs an event driver for the given event
+     *@param {Event} event - the event object
+     *@return {Object}
+    */
+    constructDriver = function(event) {
+        let type = event.type,
+            target = event.target,
+            eventConstruct = null;
+
+        for (const x of EVENT_DRIVERS) {
+            if (x.events.includes(type) && typeof driverClasses[x.name] !== 'undefined') {
+                eventConstruct = new driverClasses[x.name](event);
+                break;
+            }
+        }
+
+        //if no driver is found, use custom driver
+        if (eventConstruct === null)
+            eventConstruct = new CustomDriver(event);
+
+        return {target, eventConstruct};
+    },
+
+    /**
      * executes all bound ready event listeners once the DOMContentLoaded event is fired
      *@param {Object} e - the event object
     */
-    executeReadyEventListeners = function(e) {},
+    executeReadyEventListeners = function(e) {
+        let {eventDriver} = constructDriver(e);
+
+        eventStates.readyEventListeners.forEach((listener) => {
+            Util.runSafeWithDefaultArg(listener.callback, eventDriver,
+                listener.scope || eventDriver, listener.parameters);
+        }).empty();
+    },
 
     /**
      * initializes the event module
@@ -223,6 +333,33 @@ let eventModule = {
     set resizeEventThrottleInterval(interval) {
         if (Util.isNumber(interval))
             eventStates.resizeThrottleInterval = interval;
+    },
+
+    /**
+     * registers ready event listener.
+     *
+     *@param {Function} callback - the callback function
+     *@param {Object} [config] - optional configuration object
+     *@param {boolean} [config.runLast=false] - boolean value indicating if this listener
+     * should be executed last
+     *@param {boolean} [config.runFirst=false] - boolean value indicating if this listener
+     * should be executed first
+     *@param {number} [config.priority=5] - integer value indicating listener execution
+     * priority level. defaults to 5
+     *@param {Object} [scope=host] - scope execution object, defaults the event object
+     *@param {...*} [parameters] - comma separated list of parameters to pass to listener
+     * during execution
+     *@throws {TypeError} if listener is not a function.
+     *@returns {this}
+    */
+    ready(callback, config, scope, ...parameters) {
+        if (!Util.isCallable(callback))
+            throw new TypeError('argument one is not a function');
+
+        config = constructConfig(config, false);
+        eventStates.readyEventListeners.push({callback, scope, parameters, config});
+
+        return this;
     },
 };
 
