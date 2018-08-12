@@ -228,6 +228,23 @@ let
     },
 
     /**
+     * creates an event that can be dispatched to an event target
+     *@private
+     *@param {string} type - the event type
+     *@param {Object} [eventInit] - optional event initialization object
+     *@param {Object} [detail] - custom event data. only applicable for custom events
+     *@returns {Event}
+    */
+    constructEvent = function(type, eventInit, detail) {
+        eventInit = Util.isPlainObject(eventInit)? eventInit : {};
+        for (const x of EVENT_DRIVERS)
+            if (x.events.includes(type) && typeof driverClasses[x.name] !== 'undefined')
+                return (driverClasses[x.name]).create(type, eventInit);
+
+        return CustomDriver.create(type, eventInit, detail);
+    },
+
+    /**
      * aliases the event type to the real event that is supported by the browser
      *@param {string} type - event type to aliase
      *@returns {string}
@@ -813,6 +830,31 @@ let eventModule = {
             type = aliaseEventType(type);
             if (proceedToUnbindAll(type, target, xConfig))
                 unbindListener(type, xConfig);
+        });
+        return this;
+    },
+
+    /**
+     * dispatches specified event type(s) on the given event target.
+     *
+     *@param {string|string[]} type - event type or array of event types
+     *@param {EventTarget} target - event target object
+     *@param {Object} [eventInit] - optional event initialization object
+     * bubble. default value is true.
+     *@param {*} [detail] - custom event data. only applicable to custom events
+     *@throws {TypeError} if argument two is not an event target
+     *@returns {this}
+    */
+    dispatch(type, target, eventInit, detail) {
+        if (!Util.isEventTarget(target))
+            throw new TypeError('argument two is not a valid event target');
+
+        let types = Util.makeArray(type);
+
+        types.forEach(type => {
+            type = aliaseEventType(type);
+            let event = constructEvent(type, eventInit, detail);
+            target.dispatchEvent(event);
         });
         return this;
     },
