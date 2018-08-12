@@ -1,4 +1,4 @@
-import { install, uninstall, host, root } from './Globals.js';
+import { install, uninstall, host, root, onInstall } from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
 
@@ -122,7 +122,37 @@ let
          * last resize event timestamp
         */
         resizeThrottleTimestamp: 0
+    },
+
+    /**
+     * executes all bound ready event listeners once the DOMContentLoaded event is fired
+     *@param {Object} e - the event object
+    */
+    executeReadyEventListeners = function(e) {},
+
+    /**
+     * initializes the event module
+    */
+    init = function() {
+        //test for passive event listener support
+        let accessor = {},
+            listener = function(){};
+
+        Object.defineProperty(accessor, 'passive', {
+            get() {
+                eventStates.hasPassiveEventListenerSupport = true;
+                return true;
+            }
+        });
+        root.addEventListener('passive', listener, accessor);
+        root.removeEventListener('passive', listener, accessor);
+
+        //when the DOMContentLoaded event is fired, execute ready event listeners
+        root.addEventListener('DOMContentLoaded', executeReadyEventListeners, false);
+        init = null;
     };
+
+onInstall(init);
 
 let eventModule = {
     /**
