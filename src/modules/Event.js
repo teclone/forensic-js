@@ -343,6 +343,58 @@ let
     },
 
     /**
+     * checks if all event listener unbind process should proceed.
+     *@private
+     *@param {string} type - the event type
+     *@param {EventTarget} target - the event target
+     *@param {Object} config - event listener configuration object
+     *@param {boolean} config.bindPassive - boolean value indicating if the listener is a passive listener
+     *@param {boolean} config.capture - boolean value indicating if the listener was bound on the capture phase
+     *@returns {boolean}
+    */
+    proceedToUnbindAll = function(type, target, config) {
+        let shouldProceed = false;
+        if (typeof type === 'string' && type) {
+            let boundTypes = null,
+                listeners = null,
+                alternatePhaseListeners = null;
+
+            if (config.passive) {
+                boundTypes = eventStates.boundPassiveEventTypes;
+
+                listeners = config.capture? eventStates.capturePhasePassiveEventListeners :
+                    eventStates.passiveEventListeners;
+                alternatePhaseListeners = config.capture? eventStates.passiveEventListeners :
+                    eventStates.capturePhasePassiveEventListeners;
+            }
+            else {
+                boundTypes = eventStates.boundEventTypes;
+
+                listeners = config.capture? eventStates.capturePhaseEventListeners :
+                    eventStates.eventListeners;
+                alternatePhaseListeners = config.capture? eventStates.eventListeners :
+                    eventStates.capturePhaseEventListeners;
+            }
+
+            if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
+                listeners[type].length > 0) {
+                listeners[type].forEach(function(listener, index, queue) {
+                    if (listener.target === target) {
+                        queue.deleteIndex(index);
+                    }
+                });
+
+                if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
+                    alternatePhaseListeners[type].length === 0)) {
+                    boundTypes.deleteItem(type);
+                    shouldProceed = true;
+                }
+            }
+        }
+        return shouldProceed;
+    },
+
+    /**
      * throttles events
      *@param {string} type - the event type to throttle
      *@param {number} timestamp - the event timestamp
@@ -731,6 +783,35 @@ let eventModule = {
         types.forEach(type => {
             type = aliaseEventType(type);
             if(proceedToUnbind(type, callback, target, xConfig))
+                unbindListener(type, xConfig);
+        });
+        return this;
+    },
+
+    /**
+     * unbinds all event listeners for specified event type(s) on a given event target.
+     *
+     *@param {string|string[]} type - event type or array of event types
+     *@param {EventTarget} target - event target object
+     *@param {Object} [config] - optional configuration object
+     *@param {boolean} [config.bindPassive=false] - boolean value indicating if listener
+     * was bound in passive or non passive mode. defaults to false
+     *@param {boolean} [config.capture=false] - boolean value indicating if listener was
+     * bound to the capturing phase. defaults to false
+     *@throws {Error|TypeError} if listener is not a function, or if the dom is not yet loaded
+     * and ready
+     *@returns {this}
+    */
+    unbindAll(type, target, config) {
+        if (!Util.isEventTarget(target))
+            throw new TypeError('argument two is not a valid event target');
+
+        let xConfig = constructConfig(config, true),
+            types = Util.makeArray(type);
+
+        types.forEach(type => {
+            type = aliaseEventType(type);
+            if (proceedToUnbindAll(type, target, xConfig))
                 unbindListener(type, xConfig);
         });
         return this;
