@@ -211,20 +211,239 @@ let
     constructDriver = function(event) {
         let type = event.type,
             target = event.target,
-            eventConstruct = null;
+            eventDriver = null;
 
         for (const x of EVENT_DRIVERS) {
             if (x.events.includes(type) && typeof driverClasses[x.name] !== 'undefined') {
-                eventConstruct = new driverClasses[x.name](event);
+                eventDriver = new driverClasses[x.name](event);
                 break;
             }
         }
 
         //if no driver is found, use custom driver
-        if (eventConstruct === null)
-            eventConstruct = new CustomDriver(event);
+        if (eventDriver === null)
+            eventDriver = new CustomDriver(event);
 
-        return {target, eventConstruct};
+        return {target, eventDriver};
+    },
+
+    /**
+     * aliases the event type to the real event that is supported by the browser
+     *@param {string} type - event type to aliase
+     *@returns {string}
+    */
+    aliaseEventType = function(type) {
+        if (typeof eventStates.aliases[type] !== 'undefined')
+            return eventStates.aliases[type];
+        else
+            return type;
+    },
+
+    /**
+     * checks if the event listener bind process should proceed.
+     *@private
+     *@param {string} type - the event type
+     *@param {Function} callback - the event callback listener
+     *@param {EventTarget} target - the event target
+     *@param {Object} config - event listener configuration object,
+     *@param {boolean} config.passive - boolean value indicating if the listener is a passive listener
+     *@param {boolean} config.capture - boolean value indicating if the listener should be bound on the capture phase
+     *@param {Object} [scope] - scope execution object
+     *@param {Array} [parameters=[]] - array of parameters to pass to listener during execution
+     *@returns {boolean}
+    */
+    proceedToBind = function(type, callback, target, config, scope, parameters) {
+        let shouldProceed = false;
+        if (typeof type === 'string' && type) {
+            shouldProceed = true;
+            let boundTypes = config.passive? eventStates.boundPassiveEventTypes : eventStates.boundEventTypes;
+
+            if (boundTypes.includes(type))
+                shouldProceed = false;
+            else
+                boundTypes.push(type);
+
+            //check if we should store the listener
+            let listeners = null,
+                storelistener = true;
+
+            if (config.capture)
+                listeners = config.passive? eventStates.capturePhasePassiveEventListeners : eventStates.capturePhaseEventListeners;
+            else
+                listeners = config.passive? eventStates.passiveEventListeners : eventStates.eventListeners;
+
+            if (typeof listeners[type] === 'undefined')
+                listeners[type]= new Queue([], true, false, fnSort);
+            else
+                listeners[type].forEach(function(listener) {
+                    if (listener.callback === callback && listener.target === target) {
+                        storelistener = false;
+                        return 'stop';
+                    }
+                });
+
+            if (storelistener)
+                listeners[type].push({callback, target, scope, parameters, config});
+        }
+        return shouldProceed;
+    },
+
+    /**
+     * throttles events
+     *@param {string} type - the event type to throttle
+     *@param {number} timestamp - the event timestamp
+     *@return {boolean}
+    */
+    throttleEvent = function(type, timestamp) {
+        let timestampKey = type + 'ThrottleTimestamp',
+            intervalKey = type + 'ThrottleInterval';
+
+        let lastTimestamp = eventStates[timestampKey];
+
+        if ((timestamp - lastTimestamp) < eventStates[intervalKey])
+            return true;
+
+        eventStates[timestampKey] = timestamp;
+        return false;
+    },
+
+    /**
+     * executes event states listeners route
+     *@private
+     *@param {Object} e - the event object
+     *@param {Object} capturingEventStateListeners - the capturing event state listeners object
+     *@param {Object} eventStateListeners - the event state listeners object
+     *@param {boolean} [passive=false] - boolean value indicating if event is passive
+    */
+    executeEventStateListenersRoute = function(e, capturingEventStateListeners, eventStateListeners, passive) {
+
+        let run = function(eventDriver, listener, target, lTarget) {
+            //should scope the event target or the current event target?
+                let scope = Util.isObject(listener.scope)? listener.scope : target;
+
+                eventDriver.currentTarget = lTarget;
+
+                if (listener.config.runOnce)
+                    eventModule.unbind(eventDriver.type, listener.callback, lTarget, listener.config);
+
+                Util.runSafeWithDefaultArg(listener.callback, eventDriver, scope,
+                    listener.parameters);
+            },
+
+            type = e.type,
+            capturingListeners = typeof capturingEventStateListeners[type] !== 'undefined'?
+                capturingEventStateListeners[type] : null,
+            listeners = typeof eventStateListeners[type] !== 'undefined'?
+                eventStateListeners[type] : null;
+
+        if (eventStates.silenceEvents)
+            e.stopPropagation(); //stop further browsing of the event.
+
+        //check for
+        switch(type) {
+            case 'scroll':
+            case 'resize':
+                if (throttleEvent(type, e.timeStamp))
+                    return;
+                break;
+
+        }
+
+        if ((capturingListeners && capturingListeners.length > 0) || (listeners && listeners.length > 0)) {
+            let {target, eventDriver} = constructDriver(e);
+            eventDriver.passive = passive;
+
+
+            //current event phase is capture phase.
+            if (capturingListeners) {
+                capturingListeners.clone().forEach(listener => {
+                    let proceed = false,
+                        lTarget = listener.target;
+
+                    if (lTarget === host || lTarget === root)
+                        proceed = true;
+                    else if (target !== host && target !== root && Util.nodeContains(lTarget, target))
+                        proceed = true;
+
+                    if (proceed)
+                        run(eventDriver, listener, target, lTarget);
+
+                    if(!eventDriver.isPropagating)
+                        return 'stop';
+                });
+            }
+
+            //enter the next phase.
+            if (listeners && eventDriver.isPropagating) {
+                listeners.clone().forEach(listener => {
+                    let proceed = false,
+                        lTarget = listener.target;
+
+                    if (lTarget === target)
+                        proceed = true;
+                    else if (eventDriver.bubbles && listener.config.acceptBubbledEvents &&
+                    (lTarget === host || lTarget === root || Util.nodeContains(lTarget, target)))
+                        proceed = true;
+
+                    if (proceed) {
+                        eventDriver.phase = lTarget === target? 2 : 3;
+                        run(eventDriver, listener, target, lTarget);
+                    }
+
+                    if(!eventDriver.isPropagating)
+                        return 'stop';
+                });
+            }
+
+            eventDriver.phase = 0;
+        }
+    },
+
+    /**
+     * passive event listener router, routes the event to its listeners
+     *@param {Object} e - the event object
+    */
+    passiveEventListenerRouter = function(e) {
+        //if event has not been handled, handle it
+        if (typeof e.pEventId === 'undefined') {
+            e.pEventId = eventStates.eventId;
+            executeEventStateListenersRoute(e, eventStates.capturePhasePassiveEventListeners, eventStates.passiveEventListeners, true);
+        }
+    },
+
+    /**
+     * event listener router, routes the event to its listeners
+     *@param {Object} e - the event object
+    */
+    eventListenerRouter = function(e) {
+        //if event has not been handled, handle it
+        if (typeof e.eventId === 'undefined') {
+            e.eventId = eventStates.eventId;
+            executeEventStateListenersRoute(e, eventStates.capturePhaseEventListeners, eventStates.eventListeners);
+        }
+    },
+
+    /**
+     * binds event router for the given event type
+     *@private
+     *@param {string} type - the event type
+     *@param {Object} config - the event configuration options
+     *@param {boolean} config.passive - boolean value indicating if the listener is a passive listener
+    */
+    bindListener = function(type, config) {
+        let router = config.passive? passiveEventListenerRouter : eventListenerRouter;
+
+        //bind on root document
+        root.addEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
+            passive: config.passive,
+            capture: true
+        }: true);
+
+        //bind on window object
+        host.addEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
+            passive: config.passive,
+            capture: true
+        }: true);
     },
 
     /**
@@ -359,6 +578,53 @@ let eventModule = {
         config = constructConfig(config, false);
         eventStates.readyEventListeners.push({callback, scope, parameters, config});
 
+        return this;
+    },
+
+    /**
+     * binds event listener for a specified event type(s) on a given event target.
+     *
+     *@param {string|string[]} type - event type or array of event types
+     *@param {Function} callback - event listener callback
+     *@param {EventTarget} target - event target object
+     *@param {Object} [config] - optional configuration object
+     *@param {boolean} [config.passive=false] - boolean value indicating if listener
+     * should be bound in passive or non passive mode. defaults to false
+     *@param {boolean} [config.capture=false] - boolean value indicating if listener should be
+     * bound to the capturing phase. defaults to false
+     *@param {boolean} [config.runLast=false] - boolean value indicating if listener should
+     * be executed last. defaults to false
+     *@param {boolean} [config.runFirst=false] - boolean value indicating if listener should
+     * be executed first. defaults to false
+     *@param {boolean} [config.runOnce=false] - boolean value indicating if listener should
+     * run only once. defaults to false
+     *@param {number} [config.priority=5] - integer value indicating listener execution
+     * priority level. defaults to 5
+     *@param {boolean} [config.acceptBubbledEvents=true] - set to false if you only want the
+     * listener callback to be executed when the event origin is the target given. Bubbled
+     * events will not trigger execution if set to false.
+     *@param {Object} [scope] - scope execution object. defaults to host object
+     *@param {...*} [parameters] - comma separated list of parameters to pass to listener
+     * during execution
+     *@throws {Error|TypeError} if listener is not a function, or if the dom is not yet loaded
+     * and ready
+     *@returns {this}
+    */
+    bind(type, callback, target, config, scope, ...parameters) {
+        if (!Util.isCallable(callback))
+            throw new TypeError('argument two is not a function');
+
+        if (!Util.isEventTarget(target))
+            throw new TypeError('argument three is not a valid event target');
+
+        let xConfig = constructConfig(config, true),
+            types = Util.makeArray(type);
+
+        types.forEach(type => {
+            type = aliaseEventType(type);
+            if (proceedToBind(type, callback, target, xConfig, scope, parameters))
+                bindListener(type, xConfig);
+        });
         return this;
     },
 };
