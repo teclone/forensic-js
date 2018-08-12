@@ -55,47 +55,47 @@ describe('Event.Drivers.MouseDriver', function() {
 
         it(`should set the clientX option to 0 when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.clientX).to.be.equals(0);
+            expect(options.clientX).to.equals(0);
         });
 
         it(`should set the clientY option to 0 when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.clientY).to.be.equals(0);
+            expect(options.clientY).to.equals(0);
         });
 
         it(`should set the screenX option to 0 when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.screenX).to.be.equals(0);
+            expect(options.screenX).to.equals(0);
         });
 
         it(`should set the screenY option to 0 when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.screenY).to.be.equals(0);
+            expect(options.screenY).to.equals(0);
         });
 
         it(`should set the ctrlKey option to false when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.ctrlKey).to.be.equals(false);
+            expect(options.ctrlKey).to.equals(false);
         });
 
         it(`should set the altKey option to false when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.altKey).to.be.equals(false);
+            expect(options.altKey).to.equals(false);
         });
 
         it(`should set the metaKey option to false when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.metaKey).to.be.equals(false);
+            expect(options.metaKey).to.equals(false);
         });
 
         it(`should set the shiftKey option to false when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.shiftKey).to.be.equals(false);
+            expect(options.shiftKey).to.equals(false);
         });
 
         it(`should set the button option to 0 when not given`, function() {
             let options = MouseDriver.initEvent({}, {});
-            expect(options.button).to.be.equals(0);
+            expect(options.button).to.equals(0);
         });
 
         it(`should set the relatedTarget option to null when not given`, function() {
@@ -105,7 +105,7 @@ describe('Event.Drivers.MouseDriver', function() {
     });
 
     describe('.create(type, eventInit?)', function() {
-        it(`should create and return a native UIEvent object of the given type, using the
+        it(`should create and return a native MouseEvent object of the given type, using the
         optional eventInit options`, function() {
             let event = MouseDriver.create('focusin', {});
             expect(event).to.be.a('MouseEvent');
@@ -124,66 +124,66 @@ describe('Event.Drivers.MouseDriver', function() {
 
     describe('#clientX', function() {
         it(`should hold the X cordinate of the mouse in relation to the browser viewport`, function() {
-            expect(driver.clientX).to.be.equals(0);
+            expect(driver.clientX).to.equals(0);
         });
     });
 
     describe('#clientY', function() {
         it(`should hold the Y cordinate of the mouse in relation to the browser viewport`, function() {
-            expect(driver.clientY).to.be.equals(0);
+            expect(driver.clientY).to.equals(0);
         });
     });
 
     describe('#screenX', function() {
         it(`should hold the X cordinate of the mouse in relation to the device physical screen`, function() {
-            expect(driver.screenX).to.be.equals(0);
+            expect(driver.screenX).to.equals(0);
         });
     });
 
     describe('#screenY', function() {
         it(`should hold the Y cordinate of the mouse in relation to the device physical screen`, function() {
-            expect(driver.screenY).to.be.equals(0);
+            expect(driver.screenY).to.equals(0);
         });
     });
 
     describe('#ctrlKey', function() {
         it(`should hold a boolean value indicating if the control key was activated during the
         event`, function() {
-            expect(driver.ctrlKey).to.be.equals(false);
+            expect(driver.ctrlKey).to.equals(false);
         });
     });
 
     describe('#shiftKey', function() {
         it(`should hold a boolean value indicating if the shift key was activated during the
         event`, function() {
-            expect(driver.shiftKey).to.be.equals(false);
+            expect(driver.shiftKey).to.equals(false);
         });
     });
 
     describe('#metaKey', function() {
         it(`should hold a boolean value indicating if the meta key was activated during the
         event`, function() {
-            expect(driver.metaKey).to.be.equals(false);
+            expect(driver.metaKey).to.equals(false);
         });
     });
 
     describe('#altKey', function() {
         it(`should hold a boolean value indicating if the alternate key was activated during the
         event`, function() {
-            expect(driver.altKey).to.be.equals(false);
+            expect(driver.altKey).to.equals(false);
         });
     });
 
     describe('#button', function() {
         it(`should hold an integer value that indicates the mouse button that was pressed.`, function() {
-            expect(driver.button).to.be.equals(0);
+            expect(driver.button).to.equals(0);
         });
     });
 
     describe('#buttons', function() {
         it(`should hold an integer value that indicates a bitwise combination of the mouse buttons
         that were active in the cause of the event.`, function() {
-            expect(driver.buttons).to.be.equals(0);
+            expect(driver.buttons).to.equals(0);
         });
     });
 
