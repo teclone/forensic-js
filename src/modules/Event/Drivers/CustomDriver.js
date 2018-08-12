@@ -4,11 +4,11 @@
 
 /**
  * event initialization options.
- *@typedef {Object} EventInit
- *@property {boolean} [EventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [EventInit.cancelable=false] - boolean value indicating if event is
+ *@typedef {Object} CustomEventInit
+ *@property {boolean} [CustomEventInit.bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [CustomEventInit.cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {mixed} [EventInit.detail=null] - the custom event detail
+ *@property {mixed} [CustomEventInit.detail=null] - the custom event detail
 */
 import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
@@ -41,7 +41,7 @@ export default class CustomDriver extends Driver {
     /**
      * initializes the event according to the CustomEvent interface eventInit requirement
      *@param {Object} storeIn - object in which to store initializations
-     *@param {EventInit} getFrom - event initialization objects
+     *@param {CustomEventInit} getFrom - event initialization objects
      *@param {mixed} [detail=null] - the custom event data
      *@returns {Object}
     */
@@ -54,7 +54,7 @@ export default class CustomDriver extends Driver {
     /**
      * creates a CustomEvent object that can be dispatched to an event target
      *@param {string} type - the event type
-     *@param {EventInit} eventInit - event initialization object
+     *@param {CustomEventInit} eventInit - event initialization object
      *@param {mixed} [detail=null] - the custom event data
      *@returns {CustomEvent}
     */
