@@ -182,5 +182,18 @@ describe('Globals', function() {
 
             expect(event).to.equals(null);
         });
+
+        it('should resolve object like list of arguments too', function() {
+            let event = Globals.createDOMEvent('AnimationEven', 'submit', {
+                bubbles: true,
+                cancelable: true,
+                altKey: true,
+                metaKey: true,
+                shiftKey: false
+            },
+            ['bubbles', 'cancelable', {altKey: 'Alt', metaKey: 'Meta', shift: 'Shift'}]);
+
+            expect(event).to.equals(null);
+        });
     });
 });
