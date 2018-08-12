@@ -158,8 +158,21 @@ export let createDOMEvent = function(eventInterface, type, eventInit, eventInitK
     }
 
     //check if event can be created using document.createEvent
+
     let eventInitArray = eventInitKeys? eventInitKeys.map((key) => {
-        return eventInit[key];
+        if (typeof key === 'string')
+            return eventInit[key];
+
+        //this is a modifier list stuff like keyboard event
+        let keys = key;
+
+        return Object.keys(keys).reduce((result, key) => {
+            if (eventInit[key])
+                result.push(keys[key]);
+
+            return result;
+        }, []).join(' ');
+
     }) : [];
 
     try {
