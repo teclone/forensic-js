@@ -1,4 +1,4 @@
-import { install, uninstall, host, root, onInstall } from './Globals.js';
+import { install, uninstall, host, root, onInstall, browserPrefixes } from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
 import Driver from './Event/Drivers/Driver.js';
@@ -859,5 +859,197 @@ let eventModule = {
         return this;
     },
 };
+
+let
+
+    /**
+     * cleans up event testers
+     *@this {EventTarget}
+    */
+    cleanupEventTesters = function(details, remove, style) {
+        for (let detail of details)
+            eventModule.unbind(detail.name, confirmEventTesters, this);
+
+        if (remove)
+            root.body.removeChild(this);
+
+        if(style)
+            root.getElementsByTagName('head')[0].removeChild(style);
+    },
+
+    /**
+     * confirms if an event is supported.
+     *@private
+     *@param {Object} e - the event object
+     *@param {string} driverName - the event driver name
+     *@param {Object} detail - event detail.
+     *@param {string} detail.name - the event name
+     *@param {string} detail.aliasTo - the unprefixed event name
+    */
+    /* istanbul ignore next */
+    confirmEventTesters = function(e, driverName, detail) {
+        for (const driver of EVENT_DRIVERS) {
+            if (driver.name === driverName && !driver.events.includes(detail.name)) {
+                driver.events.push(detail.name);
+                if (detail.aliasTo)
+                    eventStates.aliases[detail.aliasTo] = detail.name;
+                break;
+            }
+        }
+    },
+
+    /**
+     * tests if transition event is supported and sets the appropriate browser vendor name
+     *@private
+    */
+    testTransitionEvent = function () {
+        let elm = root.createElement('div'),
+            elm1 = root.createElement('div'),
+            prefix = '';
+
+        root.body.appendChild(elm);
+        root.body.appendChild(elm1);
+
+        for (let browserPrefix of browserPrefixes) {
+            if (typeof elm.style[Util.camelCase(browserPrefix + 'transition-property')] !== 'undefined') {
+                prefix = browserPrefix;
+                break;
+            }
+        }
+
+        let eventTypes = TransitionDriver.events,
+            eventDetails = eventTypes.map((eventType) => {
+                return {name: eventType, aliasTo: null};
+            });
+
+        //resolve browser prefixes
+        if (prefix)
+            eventTypes.forEach((eventType) => {
+                let prefixedType = eventType.replace('transition', 'transition-');
+                eventDetails.push({
+                    name: Util.camelCase(prefix + prefixedType),
+                    aliasTo: eventType
+                });
+            });
+
+        //bind the events for the elm
+        eventDetails.forEach(eventDetail => {
+            eventModule.bind(eventDetail.name, confirmEventTesters, elm, null,
+                null, 'TransitionDriver', eventDetail
+            );
+        });
+
+        //bind the events for the second elm
+        eventDetails.forEach(eventDetail => {
+            eventModule.bind(eventDetail.name, confirmEventTesters, elm1, null,
+                null, 'TransitionDriver', eventDetail
+            );
+        });
+
+        let css = Util.camelCase(prefix + 'transition');
+        elm.style[css] = 'all 0.01s ease';
+        elm.style.backgroundColor = 'red';
+
+        elm1.style[css] = 'all 0.15s ease';
+        elm1.style.backgroundColor = 'red';
+
+        setTimeout(function() {
+            elm.style.backgroundColor = 'white';
+            elm1.style.backgroundColor = 'white';
+        }, 1);
+
+        setTimeout(function() {
+            root.body.removeChild(elm1);
+        }, 50);
+
+        Util.runSafe(cleanupEventTesters, elm, [eventDetails, true], 300);
+        Util.runSafe(cleanupEventTesters, elm1, [eventDetails, false], 300);
+    },
+
+    /**
+     * tests if animation event is supported and sets the appropriate browser vendor name
+     *@private
+    */
+    testAnimationEvent = function () {
+        let elm = root.createElement('div'),
+            elm1 = root.createElement('div'),
+            prefix = '',
+            keyframePrefix = '';
+
+        root.body.appendChild(elm);
+        root.body.appendChild(elm1);
+
+        for (let browserPrefix of browserPrefixes) {
+            if (typeof elm.style[Util.camelCase(browserPrefix + 'animation-name')] !== 'undefined') {
+                prefix = browserPrefix;
+                break;
+            }
+        }
+
+        let eventTypes = AnimationDriver.events,
+            eventDetails = eventTypes.map((eventType) => {
+                return {name: eventType, aliasTo: null};
+            });
+
+        //resolve browser prefixes
+        if (prefix) {
+            keyframePrefix = '-' + prefix;
+            eventTypes.forEach((eventType) => {
+                let prefixedType = eventType.replace('animation', 'animation-');
+                eventDetails.push({
+                    name: Util.camelCase(prefix + prefixedType),
+                    aliasTo: eventType
+                });
+            });
+        }
+
+        //bind the events for elem
+        eventDetails.forEach(eventDetail => {
+            eventModule.bind(eventDetail.name, confirmEventTesters, elm, null,
+                null, 'AnimationDriver', eventDetail
+            );
+        });
+
+        //bind the events for elem1
+        eventDetails.forEach(eventDetail => {
+            eventModule.bind(eventDetail.name, confirmEventTesters, elm1, null,
+                null, 'AnimationDriver', eventDetail
+            );
+        });
+
+        let css = Util.camelCase(prefix + 'animation'),
+            cssCode = `@${keyframePrefix}keyframes test_animation {
+            0%{
+                background-color: white;
+            }
+            100%{
+                background-color: #f3f3f3;
+            }
+        }`,
+            style = Util.loadInlineCSS(cssCode);
+
+        elm.style.backgroundColor = 'white';
+        elm.style[css] = 'test_animation 0.01s';
+        elm.style.visibility = 'hidden';
+
+        elm1.style.backgroundColor = 'white';
+        elm1.style[css] = 'test_animation 0.01s infinite';
+        elm1.style.visibility = 'hidden';
+
+        setTimeout(function() {
+            root.body.removeChild(elm1);
+        }, 150);
+
+        Util.runSafe(cleanupEventTesters, elm, [eventDetails, true, style], 300);
+        Util.runSafe(cleanupEventTesters, elm1, [eventDetails, false], 300);
+    };
+
+/*
+ * test transition and animation event support
+*/
+eventModule.ready(function() {
+    testTransitionEvent();
+    testAnimationEvent();
+});
 
 export default eventModule;
