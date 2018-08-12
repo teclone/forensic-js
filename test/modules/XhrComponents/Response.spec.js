@@ -2,7 +2,7 @@ import Transport from '../../../src/modules/XhrComponents/Transport.js';
 import Request from '../../../src/modules/XhrComponents/Request.js';
 import Response from '../../../src/modules/XhrComponents/Response.js';
 
-describe('XhrComponents.Request', function() {
+describe('XhrComponents.Response', function() {
     let transport = null;
 
     //start up server in node.js environment before any test begins
