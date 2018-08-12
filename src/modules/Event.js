@@ -8,6 +8,7 @@ import MouseDriver from './Event/Drivers/MouseDriver.js';
 import TransitionDriver from './Event/Drivers/TransitionDriver.js';
 import AnimationDriver from './Event/Drivers/AnimationDriver.js';
 import CustomDriver from './Event/Drivers/CustomDriver.js';
+import CompositionDriver from './Event/Drivers/CompositionDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -44,6 +45,12 @@ const EVENT_DRIVERS = [
     {
         name: 'MouseDriver',
         events: new Queue(MouseDriver.events, true, true)
+    },
+
+    //Composition Driver interface
+    {
+        name: 'CompositionDriver',
+        events: new Queue(CompositionDriver.events, true, true)
     }
 ];
 
