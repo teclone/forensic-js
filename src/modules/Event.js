@@ -15,6 +15,7 @@ import PopStateDriver from './Event/Drivers/PopStateDriver.js';
 import KeyboardDriver from './Event/Drivers/KeyboardDriver.js';
 import TouchDriver from './Event/Drivers/TouchDriver.js';
 import WheelDriver from './Event/Drivers/WheelDriver.js';
+import InputDriver from './Event/Drivers/InputDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -93,6 +94,12 @@ const EVENT_DRIVERS = [
     {
         name: 'WheelDriver',
         events: new Queue(WheelDriver.events, true, true)
+    },
+
+    //Input Driver interface
+    {
+        name: 'InputDriver',
+        events: new Queue(InputDriver.events, true, true)
     }
 ];
 
