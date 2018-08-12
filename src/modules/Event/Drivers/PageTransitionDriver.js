@@ -10,8 +10,9 @@
  * cancelable
  *@property {boolean} [PageTransitionEventInit.persisted=false] - boolean property
 */
-import {createDOMEvent} from '../../Globals.js';
+import {createDOMEvent, onInstall, host} from '../../Globals.js';
 import Driver from './Driver.js';
+import PageTransitionEventPollyfill from '../Pollyfills/PageTransitionEventPollyfill.js';
 
 /**
  * Page transition event driver class
@@ -86,3 +87,7 @@ export default class PageTransitionDriver extends Driver {
         return this.event.persisted;
     }
 }
+
+onInstall(function() {
+    PageTransitionEventPollyfill.install(host, PageTransitionDriver.initEvent);
+});
