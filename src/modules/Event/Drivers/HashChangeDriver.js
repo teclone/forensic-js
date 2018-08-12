@@ -9,7 +9,7 @@
  *@property {boolean} [HashChangeEventInit.cancelable=false] - boolean value indicating if event is
  * cancelable
  *@property {string} [HashChangeEventInit.oldURL=''] - represent the old url
- *@property {string} [eventInit.newURL=''] - represent the new url
+ *@property {string} [HashChangeEventInit.newURL=''] - represent the new url
 */
 import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
