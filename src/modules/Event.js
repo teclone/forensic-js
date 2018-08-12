@@ -14,6 +14,7 @@ import PageTransitionDriver from './Event/Drivers/PageTransitionDriver.js';
 import PopStateDriver from './Event/Drivers/PopStateDriver.js';
 import KeyboardDriver from './Event/Drivers/KeyboardDriver.js';
 import TouchDriver from './Event/Drivers/TouchDriver.js';
+import WheelDriver from './Event/Drivers/WheelDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -86,6 +87,12 @@ const EVENT_DRIVERS = [
     {
         name: 'TouchDriver',
         events: new Queue(TouchDriver.events, true, true)
+    },
+
+    //Wheel Driver interface
+    {
+        name: 'WheelDriver',
+        events: new Queue(WheelDriver.events, true, true)
     }
 ];
 
