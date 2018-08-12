@@ -13,6 +13,7 @@ import HashChangeDriver from './Event/Drivers/HashChangeDriver.js';
 import PageTransitionDriver from './Event/Drivers/PageTransitionDriver.js';
 import PopStateDriver from './Event/Drivers/PopStateDriver.js';
 import KeyboardDriver from './Event/Drivers/KeyboardDriver.js';
+import TouchDriver from './Event/Drivers/TouchDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -79,6 +80,12 @@ const EVENT_DRIVERS = [
     {
         name: 'KeyboardDriver',
         events: new Queue(KeyboardDriver.events, true, true)
+    },
+
+    //Touch Driver interface
+    {
+        name: 'TouchDriver',
+        events: new Queue(TouchDriver.events, true, true)
     }
 ];
 
