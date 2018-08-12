@@ -20,10 +20,23 @@
             import './test/modules/Globals.spec.js';
             import './test/modules/Util.spec.js';
             import './test/modules/Queue.spec.js';
+
             import './test/modules/XhrComponents/Transport.spec.js';
             import './test/modules/XhrComponents/Request.spec.js';
             import './test/modules/XhrComponents/Response.spec.js';
             import './test/modules/Xhr.spec.js';
+
+            import './test/modules/Event/Drivers/Driver.spec.js';
+            import './test/modules/Event/Drivers/CustomDriver.spec.js';
+
+            import './test/modules/Event/Drivers/TransitionDriver.spec.js';
+            import './test/modules/Event/Drivers/AnimationDriver.spec.js';
+
+            import './test/modules/Event/Drivers/UIDriver.spec.js';
+            import './test/modules/Event/Drivers/FocusDriver.spec.js';
+            import './test/modules/Event/Drivers/MouseDriver.spec.js';
+
+            import './test/modules/Event.spec.js';
 
             mocha.checkLeaks();
             mocha.run();
