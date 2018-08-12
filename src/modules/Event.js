@@ -9,6 +9,7 @@ import TransitionDriver from './Event/Drivers/TransitionDriver.js';
 import AnimationDriver from './Event/Drivers/AnimationDriver.js';
 import CustomDriver from './Event/Drivers/CustomDriver.js';
 import CompositionDriver from './Event/Drivers/CompositionDriver.js';
+import HashChangeDriver from './Event/Drivers/HashChangeDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -51,6 +52,12 @@ const EVENT_DRIVERS = [
     {
         name: 'CompositionDriver',
         events: new Queue(CompositionDriver.events, true, true)
+    },
+
+    //HashChange Driver interface
+    {
+        name: 'HashChangeDriver',
+        events: new Queue(HashChangeDriver.events, true, true)
     }
 ];
 
