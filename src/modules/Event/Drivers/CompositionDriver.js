@@ -51,7 +51,7 @@ export default class CompositionDriver extends UIDriver {
     static initEvent(storeIn, getFrom) {
         UIDriver.initEvent(storeIn, getFrom);
 
-        storeIn.data = typeof getFrom.data === 'string'? getFrom.data : '';
+        storeIn.data = typeof getFrom.data !== 'undefined'? getFrom.data.toString() : '';
 
         return storeIn;
     }
