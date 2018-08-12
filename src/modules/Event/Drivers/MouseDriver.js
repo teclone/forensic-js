@@ -36,7 +36,7 @@ import UIDriver from './UIDriver.js';
 import Util from '../../Util.js';
 
 /**
- * focus event driver class
+ * mouse event driver class
  *@memberof EventDrivers
  *@see {@link https://www.w3.org/TR/uievents/#events-mouseevents| W3C.org}
 */
