@@ -7,7 +7,6 @@
  *@property {boolean} [PageTransitionEventInit.persisted=false] - boolean property
 */
 import { createDOMEvent } from '../../Globals.js';
-import Util from '../../Util.js';
 
 let installed = false;
 
@@ -28,11 +27,12 @@ export default {
          *@param {PageTransitionEventInit} eventInit - the event init object
         */
         host.PageTransitionEvent = function(type, eventInit) {
-            /* istanbul ignore if */
-            if (!Util.isPlainObject(eventInit))
-                eventInit = {};
-
-            let event = createDOMEvent('Event', type, initEvent({}, eventInit), ['bubbles', 'cancelable']);
+            /* istanbul ignore else */
+            if (eventInit)
+                eventInit = initEvent({}, eventInit);
+            else
+                eventInit = initEvent({}, {});
+            let event = createDOMEvent('Event', type, eventInit, ['bubbles', 'cancelable']);
 
             Object.defineProperties(event, {
                 [Symbol.toStringTag]: {
