@@ -12,6 +12,7 @@ import CompositionDriver from './Event/Drivers/CompositionDriver.js';
 import HashChangeDriver from './Event/Drivers/HashChangeDriver.js';
 import PageTransitionDriver from './Event/Drivers/PageTransitionDriver.js';
 import PopStateDriver from './Event/Drivers/PopStateDriver.js';
+import KeyboardDriver from './Event/Drivers/KeyboardDriver.js';
 
 const EVENT_DRIVERS = [
     // Driver interface
@@ -72,6 +73,12 @@ const EVENT_DRIVERS = [
     {
         name: 'PopStateDriver',
         events: new Queue(PopStateDriver.events, true, true)
+    },
+
+    //Keyboard Driver interface
+    {
+        name: 'KeyboardDriver',
+        events: new Queue(KeyboardDriver.events, true, true)
     }
 ];
 
