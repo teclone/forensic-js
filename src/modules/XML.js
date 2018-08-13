@@ -1,4 +1,4 @@
-import { onInstall, host, root} from './Globals.js';
+import { onInstall, host, root, install, uninstall} from './Globals.js';
 import Util from './Util.js';
 import Xhr from './Xhr.js';
 
@@ -270,3 +270,85 @@ let init = function() {
 };
 
 onInstall(init);
+
+export default class XML {
+    /**
+     *@type {boolean}
+     * true if xml document creation is supported
+    */
+    static get supported() {
+        return xmlStates.supported;
+    }
+
+    /**
+     *@type {string}
+     * the activeXObject MSXML version string used assuming when running in internet explorer
+    */
+    static get ieString() {
+        return xmlStates.ieString;
+    }
+
+    /**
+     * calls the Globals install method with the parameters. This is useful when using the
+     * Utils module as a standalone distribution or lib.
+     *
+     *@param {Object} hostParam - the host object, the global this object in a given usage
+     * environment
+     *@param {Object} rootParam - the root object. an example is the document object
+     *@returns {boolean}
+    */
+    static install(hostParam, rootParam) {
+        return install(hostParam, rootParam);
+    }
+
+    /**
+     * calls the Globals uninstall method with the parameters. This is useful when using the
+     * Utils module as a standalone distribution or lib.
+     *
+     *@returns {boolean}
+    */
+    static uninstall() {
+        return uninstall();
+    }
+
+    /**
+     * xml document construct
+     *@param {string} [qualifiedName] - document root node qualified name
+     *@param {Object} [namespaces] - object literal containing prefixName:namespaceURI pairs.
+     * the default namespaceURI should be named 'default' or 'xmlns'.
+     *@param {DocumentType} [documentType=null] - a documentType node. defaults to null.
+    */
+    constructor(qualifiedName, namespaces, documentType) {
+        let stringNamespaces = '';
+        if (Util.isPlainObject(namespaces)) {
+            for (let [name, value] of Object.entries(namespaces)) {
+                let namespace = `xmlns${name === 'default' || name === 'xmlns'? '' : ':' + name}="${value}"`;
+                stringNamespaces += ` ${namespace}`;
+            }
+        }
+
+        let prolog = '';
+        if (typeof qualifiedName === 'string' && qualifiedName) {
+            prolog = `<?xml version="1.0" encoding="utf-8" ?>
+                <${qualifiedName}${stringNamespaces? stringNamespaces : ''}></${qualifiedName}>`;
+        }
+
+        this._document = createDocument(prolog, documentType);
+    }
+
+    /**
+     * returns object identity
+     *@type {string}
+    */
+    get [Symbol.toStringTag]() {
+        return 'XML';
+    }
+
+    /**
+     * the xml document
+     *@type {XMLDocument}
+    */
+    get document() {
+        return this._document;
+    }
+}
