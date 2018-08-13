@@ -123,11 +123,11 @@ let xmlStates = {
             xmlStates.supported = true;
             createDocument = creatDOMImplementationDocument;
         }
-        else {
+
+        if (!xmlStates.supported)
             createDocument = () => {
                 throw new Error('XML Document is not supported');
             };
-        }
 
         creatDOMImplementationDocument = createActiveXObjectDocument = null;
         return createDocument(prolog, documentType);
