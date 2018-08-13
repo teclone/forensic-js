@@ -394,4 +394,22 @@ export default class XML {
                     });
             });
     }
+
+    /**
+     * loads xml string into the document
+     *@param {string} xmlString - the xml string
+     *@returns {Promise}
+    */
+    loadXML(xmlString) {
+        xmlString = xmlString.toString().trim();
+        let xmlDoc = this.document;
+        return new Promise((resolve, reject) => {
+            xmlDoc.loadXML(xmlString);
+
+            if (xmlDoc.parseError.errorCode === 0)
+                resolve(xmlDoc);
+            else
+                reject(xmlDoc);
+        });
+    }
 }
