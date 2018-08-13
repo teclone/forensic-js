@@ -62,6 +62,7 @@ describe('Event.Drivers.Driver', function() {
     describe('#target', function() {
         it(`should hold the event target`, function(done) {
             target.addEventListener('submit', function(e) {
+                e.preventDefault();
                 let driver = new Driver(e);
                 if (driver.target === target)
                     done();
@@ -77,6 +78,7 @@ describe('Event.Drivers.Driver', function() {
         a getter`, function(done) {
             document.addEventListener('submit', function(e) {
                 let driver = new Driver(e);
+                e.preventDefault();
                 if (driver.currentTarget === document)
                     done();
                 else
@@ -154,7 +156,6 @@ describe('Event.Drivers.Driver', function() {
             expect(driver.bubbles).to.be.true;
             //create a an event that does not bubble
             event = Driver.create('submit', {bubbles: false});
-            target.dispatchEvent(event);
 
             driver = new Driver(event);
             expect(driver.bubbles).to.be.false;
