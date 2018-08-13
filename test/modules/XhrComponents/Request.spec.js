@@ -303,7 +303,7 @@ describe('XhrComponents.Request', function() {
             }, () => {}, () => {}, transport);
 
             return request.send().then((request) => {
-                expect(request.transport.responseText).to.equals('max-stale');
+                expect(['no-cache', 'max-stale']).to.include(request.transport.responseText);
             });
         });
 
