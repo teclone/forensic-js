@@ -29,6 +29,23 @@ let xmlStates = {
     },
 
     /**
+     * handles internet explorer readystate change event
+     *@this {XMLDocument}
+     *@param {Event} e - the ready state change event object
+     *@param {Callable} resolve - promise resolve callback
+     *@param {Callable} reject - promise reject callback
+    */
+    /* istanbul ignore next */
+    handleIEReadyStateChangeEvent = function(e, resolve, reject) {
+        if (this.readyState === 4 || this.readyState === 'complete') {
+            if(this.parseError.errorCode === 0)
+                resolve(this);
+            else
+                reject(this);
+        }
+    },
+
+    /**
      * creates xml document through internet explorer active x object construct
      *@param {string} [prolog] - xml prolog as well as optional root element
      *@param {DocumentType} [documentType=null] - new document documentType node. defaults to null.
@@ -350,5 +367,31 @@ export default class XML {
     */
     get document() {
         return this._document;
+    }
+
+    /**
+     * loads xml resource from the given url
+     *@param {string} url - xml resource url location
+     *@returns {Promise}
+    */
+    load(url) {
+        let xmlDoc = this.document;
+        /* istanbul ignore if */
+        if (xmlStates.ieString)
+            return new Promise((resolve, reject) => {
+                xmlDoc.onreadystatechange = Util.generateCallback(
+                    handleIEReadyStateChangeEvent, xmlDoc, [resolve, reject]
+                );
+                xmlDoc.load(url);
+            });
+        else
+            return new Promise((resolve, reject) => {
+                xmlDoc.load(url).then(xmlDoc => {
+                    resolve(xmlDoc);
+                })
+                    .catch(xmlDoc => {
+                        reject(xmlDoc);
+                    });
+            });
     }
 }
