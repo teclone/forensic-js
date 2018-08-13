@@ -16,6 +16,8 @@ global.server = require('../server/app.js');
 global.window = dom.window;
 global.document = window.document;
 
+window.XMLSerializer = require('@harrison-ifeanyichukwu/xml-serializer');
+
 /**
  * a workaround to istanbul's branching error on constructors that extends other constructors.
 */
