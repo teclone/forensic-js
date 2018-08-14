@@ -153,4 +153,35 @@ export default {
             return xPathResult.singleNodeValue;
         }
     },
+
+    /**
+     * returns an array of all matching node items
+     *@param {string} selector - the xPath selector
+     *@param {Document|Element} node - the context node
+     *@param {Object} [namespaces] - the namespaces object
+     *@returns {Node[]}
+    */
+    selectNodes(selector, node, namespaces) {
+        let reference = validate(selector, node);
+        /* istanbul ignore if */
+        if (xPathStates.implementation == 1) {
+            reference.setProperty('SelectionNamespaces', resolveActiveXObjectNamespace(namespaces));
+            return [...node.selectNodes(selector)];
+        }
+        else {
+            let xPathResult = reference.evaluate(
+                    selector, node, resolveDOMImplementationNamespace(namespaces),
+                    host.XPathResult.ORDERED_NODE_ITERATOR_TYPE, null
+                ),
+                result = [];
+
+            let current = xPathResult.iterateNext();
+            while (current) {
+                result.push(current);
+                current = xPathResult.iterateNext();
+            }
+
+            return result;
+        }
+    }
 };
