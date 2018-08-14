@@ -18,6 +18,8 @@ global.document = window.document;
 
 window.XMLSerializer = require('@harrison-ifeanyichukwu/xml-serializer');
 
+require('wicked-good-xpath').install(window, true);
+
 /**
  * a workaround to istanbul's branching error on constructors that extends other constructors.
 */
