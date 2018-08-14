@@ -124,6 +124,7 @@ let xmlStates = {
             createDocument = creatDOMImplementationDocument;
         }
 
+        /* istanbul ignore if */
         if (!xmlStates.supported)
             createDocument = () => {
                 throw new Error('XML Document is not supported');
