@@ -105,4 +105,33 @@ describe('XPath module', function() {
             }).to.throw(TypeError);
         });
     });
+
+    describe('.selectNodes(selector, node, namespaces)', function() {
+        it(`it should select and return an array of all matching nodes, given xPath selector,
+        under the given node context`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectNodes('students/student/name', xmlDoc))
+                    .to.be.lengthOf(2).and.to.satisfy(items => {
+                        return items[0].text === 'Harrison Ifeanyichukwu' &&
+                            items[1].text === 'Helen Brown';
+                    });
+            });
+        });
+    });
 });
