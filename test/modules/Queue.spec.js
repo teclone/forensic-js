@@ -347,7 +347,7 @@ describe('Queue module', function() {
     });
 
     describe('#screen(item)', function() {
-        it(`it should guard the queue and screen out null and undefined values before they
+        it(`should guard the queue and screen out null and undefined values before they
         are put into the queue`, function() {
             expect((new Queue([null, undefined, 1, 'hey'], true)).items).to.deep.equals([1, 'hey']);
         });

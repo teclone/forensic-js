@@ -163,7 +163,7 @@ describe('Xhr', function() {
     });
 
     describe('.ieString', function() {
-        it(`it should hold the MSXML version string used in creating the request transport if
+        it(`should hold the MSXML version string used in creating the request transport if
         the environment is running in a trident engine that implements XMLHttpRequest through
         ActiveXObject`, function() {
             expect(Xhr.ieString).to.be.a('string');
