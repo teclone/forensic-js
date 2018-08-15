@@ -226,4 +226,56 @@ describe('XPath module', function() {
             });
         });
     });
+
+    describe('.selectAltNodes(selector, node, namespaces)', function() {
+        it(`should return array of node that matches one of the alternate xPath selectors
+        separated using double pipe (||), under the given node context`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectAltNodes('//age || //name', xmlDoc)).to.be.lengthOf(2)
+                    .and.to.satisfy((items) => {
+                        return items[0].text === 'Harrison Ifeanyichukwu'
+                            && items[1].text === 'Helen Brown';
+                    });
+            });
+        });
+
+        it(`should return empty array if no alternate selector matches any node`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectAltNodes('//age || //height', xmlDoc)).to.be.an('Array')
+                    .and.lengthOf(0);
+            });
+        });
+    });
 });
