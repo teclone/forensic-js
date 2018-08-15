@@ -214,8 +214,9 @@ export default {
     },
 
     /**
-     * selects and returns the first matching node from alternate xPath expression or null if
-     * there is no match found. alternate xPath expressions are separated using double pipe (||)
+     * returns the first node that matches one of the alternate xPath selectors
+     * separated using double pipe (||), under the given node context or null if no
+     * result is found
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
      *@param {Object} [namespaces] - the namespaces object
@@ -231,5 +232,26 @@ export default {
         }
 
         return null;
+    },
+
+    /**
+     * returns array of node that matches one of the alternate xPath selectors
+     * separated using double pipe (||), under the given node context or empty array if no
+     * result is found
+     *@param {string} selector - the xPath selector
+     *@param {Document|Element} node - the context node
+     *@param {Object} [namespaces] - the namespaces object
+     *@returns {Node[]}
+    */
+    selectAltNodes(selector, node, namespaces) {
+        let [namespaceResolver, reference] = validate(selector, node, namespaces);
+
+        for(selector of selector.split(/\s*\|\|\s*/)) {
+            let result = selectNodes(selector, node, namespaceResolver, reference);
+            if (result.length > 0)
+                return result;
+        }
+
+        return [];
     }
 };
