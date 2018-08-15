@@ -222,13 +222,16 @@ let xmlStates = {
  * sets up the xml module
 */
 let init = function() {
-    let xml = createDocument();
 
     /* istanbul ignore if */
     if (xmlStates.ieString)
         return;
 
-    let xmlDocumentInterface = null;
+    xmlStates.parser = new host.DOMParser();
+    xmlStates.serializer = new host.XMLSerializer();
+
+    let xml = createDocument(),
+        xmlDocumentInterface = null;
 
     /* istanbul ignore if */
     if (Util.objectIsA(xml, 'XMLDocument'))
@@ -282,9 +285,6 @@ let init = function() {
             return text.call(this);
         }
     });
-
-    xmlStates.parser = new host.DOMParser();
-    xmlStates.serializer = new host.XMLSerializer();
 };
 
 onInstall(init);
