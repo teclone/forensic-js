@@ -1,9 +1,6 @@
 import * as Globals from '../../src/modules/Globals.js';
 
 describe('Globals', function() {
-    after(function() {
-        Globals.install(window, document);
-    });
 
     describe('.installed()', function() {
         it('should return true if library globals has been installed', function() {
@@ -41,7 +38,7 @@ describe('Globals', function() {
     });
 
     describe('.uninstall()', function() {
-        beforeEach(function() {
+        afterEach(function() {
             Globals.install(window, document);
         });
 
@@ -65,50 +62,35 @@ describe('Globals', function() {
     });
 
     describe('.host', function() {
-        beforeEach(function() {
-            Globals.uninstall();
-        });
 
-        it('should be null until library globals are installed', function() {
+        it('should be null when the library globals are not installed', function() {
+            Globals.uninstall();
             expect(Globals.host).to.be.null;
         });
 
-        it('should reflect the host object immediately after library globals are intalled', function() {
+        it('should reflect the host object when library globals are intalled', function() {
             Globals.install(window, document);
             expect(Globals.host).to.equals(window);
-        });
-
-        it('should be null immediately after library globals are uninstalled', function() {
-            expect(Globals.host).to.be.null;
         });
     });
 
     describe('.root', function() {
-        beforeEach(function() {
+        it('should be null when the library globals are not installed', function() {
             Globals.uninstall();
-        });
-
-        it('should be null until library globals are installed', function() {
             expect(Globals.root).to.be.null;
         });
 
-        it('should reflect the root object immediately after library globals are intalled', function() {
+        it('should reflect the root object when library globals are intalled', function() {
             Globals.install(window, document);
             expect(Globals.root).to.equals(document);
-        });
-
-        it('should be null immediately after library globals are uninstalled', function() {
-            expect(Globals.root).to.be.null;
         });
     });
 
     describe('.onInstall(callback)', function() {
-        beforeEach(function() {
-            Globals.uninstall();
-        });
 
         it('should register a callback that gets executed once library globals are installed', function() {
             let called = false;
+            Globals.uninstall();
             Globals.onInstall(function() {
                 called = true;
             });
@@ -118,7 +100,6 @@ describe('Globals', function() {
 
         it('should execute the callback immediately if library globals are already installed', function() {
             let called = false;
-            Globals.install(window, document); //install it
             Globals.onInstall(function() {
                 called = true;
             });
@@ -133,7 +114,7 @@ describe('Globals', function() {
     });
 
     describe('.onUninstall(callback)', function() {
-        beforeEach(function() {
+        after(function() {
             Globals.install(window, document);
         });
 
@@ -148,7 +129,6 @@ describe('Globals', function() {
 
         it('should execute the callback immediately if library globals are not installed', function() {
             let called = false;
-            Globals.uninstall(); //uninstall it
             Globals.onUninstall(function() {
                 called = true;
             });
