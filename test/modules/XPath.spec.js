@@ -36,13 +36,13 @@ describe('XPath module', function() {
     });
 
     describe('.implementation', function() {
-        it(`it should hold an integer that indicates the XPath implementation type`, function() {
+        it(`should hold an integer that indicates the XPath implementation type`, function() {
             expect(XPath.implementation).to.equals(2);
         });
     });
 
     describe('.selectNode(selector, node, namespaces)', function() {
-        it(`it should select the first node that matches the given xPath selector, under the given
+        it(`should select the first node that matches the given xPath selector, under the given
         node context`, function() {
             let xmlString = `
                 <?xml version="1.0" encoding="utf-8" ?>
@@ -93,6 +93,28 @@ describe('XPath module', function() {
             });
         });
 
+        it(`should return null if no result is found`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectNode('students/student/age', xmlDoc)).to.be.null;
+            });
+        });
+
         it(`should throw error if argument one is not a selector string`, function() {
             expect(function() {
                 XPath.selectNode(null);
@@ -107,7 +129,7 @@ describe('XPath module', function() {
     });
 
     describe('.selectNodes(selector, node, namespaces)', function() {
-        it(`it should select and return an array of all matching nodes, given xPath selector,
+        it(`should select and return an array of all matching nodes, given xPath selector,
         under the given node context`, function() {
             let xmlString = `
                 <?xml version="1.0" encoding="utf-8" ?>
@@ -131,6 +153,76 @@ describe('XPath module', function() {
                         return items[0].text === 'Harrison Ifeanyichukwu' &&
                             items[1].text === 'Helen Brown';
                     });
+            });
+        });
+
+        it(`should return empty array if no result is found`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectNodes('students/student/age', xmlDoc)).to.be.an('Array')
+                    .and.lengthOf(0);
+            });
+        });
+    });
+
+    describe('.selectAltNode(selector, node, namespaces)', function() {
+        it(`should select the first node that matches a list of alternate xPath selectors
+        separated using double pipe (||), under the given node context`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectAltNode('//age || //name', xmlDoc).text).to.equals('Harrison Ifeanyichukwu');
+            });
+        });
+
+        it(`should return null if no alternate selector matches a node`, function() {
+            let xmlString = `
+                <?xml version="1.0" encoding="utf-8" ?>
+                <students>
+                    <student>
+                        <name>Harrison Ifeanyichukwu</name>
+                        <class>JSS3</class>
+                        <rating>0.7</rating>
+                    </student>
+                    <student>
+                        <name>Helen Brown</name>
+                        <class>JSS3</class>
+                        <rating>0.9</rating>
+                    </student>
+                </students>
+            `;
+
+            return new XML().loadXML(xmlString).then(function(xmlDoc) {
+                expect(XPath.selectAltNode('//age || //height', xmlDoc)).to.be.null;
             });
         });
     });
