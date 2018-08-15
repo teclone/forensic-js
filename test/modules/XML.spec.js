@@ -35,7 +35,7 @@ describe('XML module', function() {
     });
 
     describe('.ieString', function() {
-        it(`it should hold the MSXML version string used in creating the request if the
+        it(`should hold the MSXML version string used in creating the request if the
         environment is running in a trident engine that implements XML through ActiveXObject`, function() {
             expect(XML.ieString).to.be.a('string');
         });
@@ -66,12 +66,12 @@ describe('XML module', function() {
     });
 
     describe('#load(url)', function() {
-        it(`it should fetch and load the xml resource from the given url and return a promise`, function() {
+        it(`should fetch and load the xml resource from the given url and return a promise`, function() {
             let xml = new XML();
             expect(xml.load('test/helpers/correct.xml')).to.be.a('Promise');
         });
 
-        it(`it should resolve and pass in the resulting xml document as the resolver argument if the
+        it(`should resolve and pass in the resulting xml document as the resolver argument if the
         xml resource was parsed successfully`, function() {
             let xml = new XML();
             return xml.load('test/helpers/correct.xml').then(xmlDoc => {
@@ -79,7 +79,7 @@ describe('XML module', function() {
             });
         });
 
-        it(`it should reject and pass in the resulting erronous xml document as the rejector argument if the
+        it(`should reject and pass in the resulting erronous xml document as the rejector argument if the
         xml resource could not be loaded or could not be parsed successfully`, function() {
             let xml = new XML('root');
             return xml.load('test/helpers/erronous.xml').catch(xmlDoc => {
@@ -87,7 +87,7 @@ describe('XML module', function() {
             });
         });
 
-        it(`it should reject if error occured while fetching resource`, function() {
+        it(`should reject if error occured while fetching resource`, function() {
             let xml = new XML();
             return xml.load('test/helpers/unexisting.xml').catch(xmlDoc => {
                 expect(xmlDoc.parseError.errorCode).to.be.greaterThan(0);
@@ -96,7 +96,7 @@ describe('XML module', function() {
     });
 
     describe('#loadXML(xmlString)', function() {
-        it(`it should parse and load the given xml string and return a promise`, function() {
+        it(`should parse and load the given xml string and return a promise`, function() {
             let xmlString = `
                 <?xml version="1.0" encoding="utf-8" ?>
                 <students>
@@ -117,7 +117,7 @@ describe('XML module', function() {
             expect(xml.loadXML(xmlString)).to.be.a('Promise');
         });
 
-        it(`it should resolve and pass in the resulting xml document as the resolver argument if the
+        it(`should resolve and pass in the resulting xml document as the resolver argument if the
         xmlString was parsed successfully`, function() {
             let xmlString = `
                 <?xml version="1.0" encoding="utf-8" ?>
@@ -141,7 +141,7 @@ describe('XML module', function() {
             });
         });
 
-        it(`it should reject and pass in the resulting erronous xml document as the rejector argument if the
+        it(`should reject and pass in the resulting erronous xml document as the rejector argument if the
         xml resource could not be parsed successfully`, function() {
             let xmlString = `
                 <?xml version="1.0" encoding="utf-8" ?>
@@ -169,7 +169,7 @@ describe('XML module', function() {
     });
 
     describe('#document', function() {
-        it(`it should hold the xml document`, function() {
+        it(`should hold the xml document`, function() {
             expect(new XML().document.nodeType).to.be.equals(9);
         });
     });
