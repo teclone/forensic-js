@@ -212,4 +212,24 @@ export default {
     selectNodes(selector, node, namespaces) {
         return selectNodes(selector, node, ...validate(selector, node, namespaces));
     },
+
+    /**
+     * selects and returns the first matching node from alternate xPath expression or null if
+     * there is no match found. alternate xPath expressions are separated using double pipe (||)
+     *@param {string} selector - the xPath selector
+     *@param {Document|Element} node - the context node
+     *@param {Object} [namespaces] - the namespaces object
+     *@returns {Node|null}
+    */
+    selectAltNode(selector, node, namespaces) {
+        let [namespaceResolver, reference] = validate(selector, node, namespaces);
+
+        for(selector of selector.split(/\s*\|\|\s*/)) {
+            let result = selectNode(selector, node, namespaceResolver, reference);
+            if (result !== null)
+                return result;
+        }
+
+        return null;
+    }
 };
