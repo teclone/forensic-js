@@ -53,9 +53,9 @@ let xPathStates = {
      * validates the selector and node
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
-     *@returns {Document}
+     *@returns {Array}
     */
-    validate = function(selector, node) {
+    validate = function(selector, node, namespaces) {
         if (typeof selector !== 'string')
             throw new TypeError(selector + ' is not an xPath selector');
 
@@ -66,7 +66,67 @@ let xPathStates = {
         if (!xPathStates.supported)
             throw new Error('XPath is not supported');
 
-        return Util.isElementNode(node)? node.ownerDocument : node;
+        let reference = Util.isElementNode(node)? node.ownerDocument : node,
+            namespaceResolver = null;
+
+        /* istanbul ignore if */
+        if (xPathStates.implementation === 1) {
+            namespaceResolver = resolveActiveXObjectNamespace(namespaces);
+            reference.setProperty('SelectionNamespaces', namespaceResolver);
+        }
+        else {
+            namespaceResolver = resolveDOMImplementationNamespace(namespaces);
+        }
+
+        return [namespaceResolver, reference];
+    },
+
+    /**
+     * selects and returns the first matching node
+     *@param {string} selector - the xPath selector
+     *@param {Document|Element} node - the context node
+     *@param {string|Function|null} namespaceResolver - the resolved namespace in the
+     * case of IE implementation or namespace resolver for dom implementation
+     *@param {Document} reference - the owner document
+     *@returns {Node|null}
+    */
+    selectNode = function(selector, node, namespaceResolver, reference) {
+        /* istanbul ignore if */
+        if (xPathStates.implementation == 1)
+            return node.selectSingleNode(selector);
+
+        return reference.evaluate(
+            selector, node, namespaceResolver, host.XPathResult.FIRST_ORDERED_NODE_TYPE, null
+        ).singleNodeValue;
+    },
+
+    /**
+     * selects and returns the first matching node
+     *@param {string} selector - the xPath selector
+     *@param {Document|Element} node - the context node
+     *@param {string|Function|null} namespaceResolver - the resolved namespace in the
+     * case of IE implementation or namespace resolver for dom implementation
+     *@param {Document} reference - the owner document
+     *@returns {Node|null}
+    */
+    selectNodes = function(selector, node, namespaceResolver, reference) {
+
+        /* istanbul ignore if */
+        if (xPathStates.implementation == 1)
+            return [...node.selectNodes(selector)];
+
+        let xPathResult = reference.evaluate(
+            selector, node, namespaceResolver, host.XPathResult.ORDERED_NODE_ITERATOR_TYPE, null
+        );
+
+        let result = [],
+            current = xPathResult.iterateNext();
+        while (current) {
+            result.push(current);
+            current = xPathResult.iterateNext();
+        }
+
+        return result;
     },
 
     /**
@@ -132,26 +192,14 @@ export default {
     },
 
     /**
-     * selects the first matching node or null if there is no match
+     * selects and returns the first matching node or null if there is no match
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
      *@param {Object} [namespaces] - the namespaces object
      *@returns {Node|null}
     */
     selectNode(selector, node, namespaces) {
-        let reference = validate(selector, node);
-        /* istanbul ignore if */
-        if (xPathStates.implementation == 1) {
-            reference.setProperty('SelectionNamespaces', resolveActiveXObjectNamespace(namespaces));
-            return node.selectSingleNode(selector);
-        }
-        else {
-            let xPathResult = reference.evaluate(
-                selector, node, resolveDOMImplementationNamespace(namespaces),
-                host.XPathResult.FIRST_ORDERED_NODE_TYPE, null
-            );
-            return xPathResult.singleNodeValue;
-        }
+        return selectNode(selector, node, ...validate(selector, node, namespaces));
     },
 
     /**
@@ -162,26 +210,6 @@ export default {
      *@returns {Node[]}
     */
     selectNodes(selector, node, namespaces) {
-        let reference = validate(selector, node);
-        /* istanbul ignore if */
-        if (xPathStates.implementation == 1) {
-            reference.setProperty('SelectionNamespaces', resolveActiveXObjectNamespace(namespaces));
-            return [...node.selectNodes(selector)];
-        }
-        else {
-            let xPathResult = reference.evaluate(
-                    selector, node, resolveDOMImplementationNamespace(namespaces),
-                    host.XPathResult.ORDERED_NODE_ITERATOR_TYPE, null
-                ),
-                result = [];
-
-            let current = xPathResult.iterateNext();
-            while (current) {
-                result.push(current);
-                current = xPathResult.iterateNext();
-            }
-
-            return result;
-        }
-    }
+        return selectNodes(selector, node, ...validate(selector, node, namespaces));
+    },
 };
