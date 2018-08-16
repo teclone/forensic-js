@@ -1,3 +1,11 @@
 {
-    "mainModuleName": "FJS"
+    "mainModuleName": "FJS",
+    "mainModuleFileName": "exports.js",
+    "sourcemap": false,
+    "distConfig": {
+        "exclude": [
+            "src/modules/Event/*",
+            "src/modules/XhrComponents/*"
+        ]
+    }
 }
