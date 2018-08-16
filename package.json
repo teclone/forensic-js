@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "commit": "git-cz",
-    "lint": "eslint ./src/** --fix",
+    "lint-src": "eslint ./src/** --fix",
+    "lint-test": "eslint ./test/** --fix",
+    "lint": "npm run lint-src & npm run lint-test",
+    "lint-lib-build": "eslint ./lib/** --fix",
+    "lint-dist-build": "eslint ./dist/** --fix",
+    "lint-build": "npm run lint-lib-build & npm run lint-dist-build",
     "test": "BABEL_ENV=test nyc mocha --recursive",
     "watch-test": "npm run test -- -w",
     "prebuild": "rimraf dist && rimraf lib",
