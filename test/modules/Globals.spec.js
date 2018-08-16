@@ -31,7 +31,7 @@ describe('Globals', function() {
             expect(called).to.be.true;
         });
 
-        it('should do nothing if library globals is already installed', function() {
+        it('should do nothing if library globals are already installed', function() {
             expect(Globals.install(window, document)).to.be.true;
             expect(Globals.install(window, document)).to.be.false;
         });
