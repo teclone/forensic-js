@@ -39,14 +39,21 @@ describe('Event module', function() {
         or a getter. The silenceEvents status determines if the module will stop the browser
         from further processing of the event. This is the default behaviour but may make event
         handlers bound outside of the library such as through vanilla js or other js library not to
-        get triggered at all. Set this to false if use other means to bind event listeners.`, function() {
+        get triggered at all. Set this to false if use other means to bind event listeners.`, function(done) {
             expect(_Event.silenceEvents).to.be.true;
 
             _Event.silenceEvents = false;
 
-            expect(_Event.silenceEvents).to.be.false;
+            let handler = function() {
+                _Event.silenceEvents = true;
+                window.removeEventListener('click', handler, false);
+                done();
+            };
 
-            _Event.silenceEvents = true;
+            _Event.bind('click', function() {}, window, {runOnce: true});
+            window.addEventListener('click', handler, false);
+
+            _Event.dispatch('click', window);
         });
     });
 
@@ -61,6 +68,11 @@ describe('Event module', function() {
             _Event.scrollEventThrottleInterval = 250;
             expect(_Event.scrollEventThrottleInterval).to.equals(250);
         });
+
+        it(`should do nothing if the assigned value is not a number`, function() {
+            _Event.scrollEventThrottleInterval = '300';
+            expect(_Event.scrollEventThrottleInterval).to.equals(250);
+        });
     });
 
     describe('scroll event throttling', function() {
@@ -70,19 +82,19 @@ describe('Event module', function() {
             let startTime = Date.now(),
                 endTime = null;
 
-            _Event.dispatch('scroll', window); //dispatch first scroll event
-
             _Event.bind('scroll', function() {
                 endTime = Date.now();
-            }, window, {runOnce: true});
+            }, window);
 
-            _Event.dispatch('scroll', window);
-            startTime = Date.now();
+            _Event.dispatch('scroll', window); //dispatch first scroll event
 
+            endTime = null;
             while (endTime === null)
                 _Event.dispatch('scroll', window);
 
-            expect(endTime - startTime >= 100);
+            expect(endTime - startTime).to.be.at.least(100);
+
+            _Event.unbindAll('scroll', window);
         });
     });
 
@@ -97,6 +109,11 @@ describe('Event module', function() {
             _Event.resizeEventThrottleInterval = 250;
             expect(_Event.resizeEventThrottleInterval).to.equals(250);
         });
+
+        it(`should do nothing if the assigned value is not a number`, function() {
+            _Event.resizeEventThrottleInterval = '300';
+            expect(_Event.resizeEventThrottleInterval).to.equals(250);
+        });
     });
 
     describe('resize event throttling', function() {
@@ -106,19 +123,19 @@ describe('Event module', function() {
             let startTime = Date.now(),
                 endTime = null;
 
-            _Event.dispatch('resize', window); //dispatch first resize event
-
             _Event.bind('resize', function() {
                 endTime = Date.now();
-            }, window, {runOnce: true});
+            }, window);
 
-            _Event.dispatch('resize', window);
-            startTime = Date.now();
+            _Event.dispatch('resize', window); //dispatch first resize event
 
+            endTime = null;
             while (endTime === null)
                 _Event.dispatch('resize', window);
 
-            expect(endTime - startTime >= 100);
+            expect(endTime - startTime).to.be.at.least(100);
+
+            _Event.unbindAll('resize', window);
         });
     });
 
@@ -565,9 +582,17 @@ describe('Event module', function() {
                     capture: true
                 })
 
+                //should not work
+                .bind('click', callback, testDiv, {
+                    runOnce: true,
+                    capture: true
+                })
+
                 .dispatch('click', testDiv);
 
             expect(correctPhaseCount).to.equals(2);
+
+            _Event.unbind('click', callback, testDiv, {capture: true});
         });
 
         it(`should take an optional config.acceptBubbledEvents? boolean value as a fourth
@@ -654,7 +679,8 @@ describe('Event module', function() {
 
     describe('.unbind(type, callback, target, config?)', function() {
         it(`should unbind an event listener callback for the given event type(s) on the given
-            event target`, function() {
+            event target that was bound in the same passed in config phase and passive state.
+            e.g listener bound on bubble phase and non passive`, function() {
             let callCount = 0;
             let callback = function() {
                 callCount += 1;
@@ -664,6 +690,60 @@ describe('Event module', function() {
             _Event.dispatch('click', testDiv);
 
             _Event.unbind('click', callback, testDiv);
+            _Event.dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+        });
+
+        it(`should unbind an event listener callback for the given event type(s) on the given
+            event target that was bound in the same passed in config phase and passive state.
+            e.g listener bound on bubble phase and passive`, function() {
+            let callCount = 0;
+            let callback = function() {
+                    callCount += 1;
+                },
+                config = {passive: true};
+
+            _Event.bind('click', callback, testDiv, config);
+            _Event.dispatch('click', testDiv);
+
+            _Event.unbind('click', callback, testDiv, config);
+            _Event.dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+        });
+
+        it(`should unbind an event listener callback for the given event type(s) on the given
+            event target that was bound in the same passed in config phase and passive state.
+            e.g listener bound on capture phase and non passive`, function() {
+            let callCount = 0;
+            let callback = function() {
+                    callCount += 1;
+                },
+                config = {capture: true};
+
+            _Event.bind('click', callback, document.body, config);
+            _Event.dispatch('click', testDiv);
+
+            _Event.unbind('click', callback, document.body, config);
+            _Event.dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+        });
+
+        it(`should unbind an event listener callback for the given event type(s) on the given
+            event target that was bound in the same passed in config phase and passive state.
+            e.g listener bound on capture phase and passive`, function() {
+            let callCount = 0;
+            let callback = function() {
+                    callCount += 1;
+                },
+                config = {capture: true, passive: true};
+
+            _Event.bind('click', callback, document.body, config);
+            _Event.dispatch('click', testDiv);
+
+            _Event.unbind('click', callback, document.body, config);
             _Event.dispatch('click', testDiv);
 
             expect(callCount).to.equals(1);
@@ -713,7 +793,9 @@ describe('Event module', function() {
 
     describe('.unbindAll(type, target, config?)', function() {
         it(`should unbind all event listeners for the given event type(s) on the given
-            event target`, function() {
+            event target that are running in the same phase and passive state.
+            e.g events running in bubble phase, non passive`, function() {
+
             let callCount = 0;
 
             let listener1 = function() {
@@ -732,6 +814,93 @@ describe('Event module', function() {
             expect(callCount).to.equals(2);
 
             _Event.unbindAll('click', testDiv)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+        });
+
+        it(`should unbind all event listeners for the given event type(s) on the given
+            event target that are running in the same phase and passive state.
+            e.g events running in bubble phase, passive`, function() {
+
+            let callCount = 0,
+                config = {passive: true};
+
+            let listener1 = function() {
+                    callCount += 1;
+                },
+                listener2 = function() {
+                    callCount += 1;
+                };
+
+            _Event.bind('click', listener1, testDiv, config)
+
+                .bind('click', listener2, testDiv, config)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+
+            _Event.unbindAll('click', testDiv, config)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+        });
+
+        it(`should unbind all event listeners for the given event type(s) on the given
+            event target that are running in the same phase and passive state.
+            e.g events running in capture phase, non passive`, function() {
+
+            let callCount = 0,
+                config = {capture: true};
+
+            let listener1 = function() {
+                    callCount += 1;
+                },
+                listener2 = function() {
+                    callCount += 1;
+                };
+
+            _Event.bind('click', listener1, document.body, config)
+
+                .bind('click', listener2, document.body, config)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+
+            _Event.unbindAll('click', document.body, config)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+        });
+
+        it(`should unbind all event listeners for the given event type(s) on the given
+            event target that are running in the same phase and passive state.
+            e.g events running in capture phase, passive`, function() {
+
+            let callCount = 0,
+                config = {capture: true, passive: true};
+
+            let listener1 = function() {
+                    callCount += 1;
+                },
+                listener2 = function() {
+                    callCount += 1;
+                };
+
+            _Event.bind('click', listener1, document.body, config)
+
+                .bind('click', listener2, document.body, config)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+
+            _Event.unbindAll('click', document.body, config)
 
                 .dispatch('click', testDiv);
 

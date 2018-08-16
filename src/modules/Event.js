@@ -306,6 +306,7 @@ let
      *@returns {string}
     */
     aliaseEventType = function(type) {
+        /* istanbul ignore if */
         if (typeof eventStates.aliases[type] !== 'undefined')
             return eventStates.aliases[type];
         else
@@ -327,6 +328,7 @@ let
     */
     proceedToBind = function(type, callback, target, config, scope, parameters) {
         let shouldProceed = false;
+        /* istanbul ignore else */
         if (typeof type === 'string' && type) {
             shouldProceed = true;
             let boundTypes = config.passive? eventStates.boundPassiveEventTypes : eventStates.boundEventTypes;
@@ -374,6 +376,7 @@ let
     */
     proceedToUnbind = function(type, callback, target, config) {
         let shouldProceed = false;
+        /* istanbul ignore else */
         if (typeof type === 'string' && type) {
             let boundTypes = null,
                 listeners = null,
@@ -382,18 +385,26 @@ let
             if (config.passive) {
                 boundTypes = eventStates.boundPassiveEventTypes;
 
-                listeners = config.capture? eventStates.capturePhasePassiveEventListeners :
-                    eventStates.passiveEventListeners;
-                alternatePhaseListeners = config.capture? eventStates.passiveEventListeners :
-                    eventStates.capturePhasePassiveEventListeners;
+                if (config.capture) {
+                    listeners = eventStates.capturePhasePassiveEventListeners;
+                    alternatePhaseListeners = eventStates.passiveEventListeners;
+                }
+                else {
+                    listeners = eventStates.passiveEventListeners;
+                    alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
+                }
             }
             else {
                 boundTypes = eventStates.boundEventTypes;
 
-                listeners = config.capture? eventStates.capturePhaseEventListeners :
-                    eventStates.eventListeners;
-                alternatePhaseListeners = config.capture? eventStates.eventListeners :
-                    eventStates.capturePhaseEventListeners;
+                if (config.capture) {
+                    listeners = eventStates.capturePhaseEventListeners;
+                    alternatePhaseListeners = eventStates.eventListeners;
+                }
+                else {
+                    listeners = eventStates.eventListeners;
+                    alternatePhaseListeners = eventStates.capturePhaseEventListeners;
+                }
             }
 
             if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
@@ -427,6 +438,7 @@ let
     */
     proceedToUnbindAll = function(type, target, config) {
         let shouldProceed = false;
+        /* istanbul ignore else */
         if (typeof type === 'string' && type) {
             let boundTypes = null,
                 listeners = null,
@@ -435,28 +447,37 @@ let
             if (config.passive) {
                 boundTypes = eventStates.boundPassiveEventTypes;
 
-                listeners = config.capture? eventStates.capturePhasePassiveEventListeners :
-                    eventStates.passiveEventListeners;
-                alternatePhaseListeners = config.capture? eventStates.passiveEventListeners :
-                    eventStates.capturePhasePassiveEventListeners;
+                if (config.capture) {
+                    listeners = eventStates.capturePhasePassiveEventListeners;
+                    alternatePhaseListeners = eventStates.passiveEventListeners;
+                }
+                else {
+                    listeners = eventStates.passiveEventListeners;
+                    alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
+                }
             }
             else {
                 boundTypes = eventStates.boundEventTypes;
 
-                listeners = config.capture? eventStates.capturePhaseEventListeners :
-                    eventStates.eventListeners;
-                alternatePhaseListeners = config.capture? eventStates.eventListeners :
-                    eventStates.capturePhaseEventListeners;
+                if (config.capture) {
+                    listeners = eventStates.capturePhaseEventListeners;
+                    alternatePhaseListeners = eventStates.eventListeners;
+                }
+                else {
+                    listeners = eventStates.eventListeners;
+                    alternatePhaseListeners = eventStates.capturePhaseEventListeners;
+                }
             }
 
             if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
                 listeners[type].length > 0) {
                 listeners[type].forEach(function(listener, index, queue) {
-                    if (listener.target === target) {
+                    /* istanbul ignore else */
+                    if (listener.target === target)
                         queue.deleteIndex(index);
-                    }
                 });
 
+                /* istanbul ignore else */
                 if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
                     alternatePhaseListeners[type].length === 0)) {
                     boundTypes.deleteItem(type);
@@ -510,10 +531,8 @@ let
             },
 
             type = e.type,
-            capturingListeners = typeof capturingEventStateListeners[type] !== 'undefined'?
-                capturingEventStateListeners[type] : null,
-            listeners = typeof eventStateListeners[type] !== 'undefined'?
-                eventStateListeners[type] : null;
+            capturingListeners = capturingEventStateListeners[type],
+            listeners = eventStateListeners[type];
 
         if (eventStates.silenceEvents)
             e.stopPropagation(); //stop further browsing of the event.
@@ -528,6 +547,7 @@ let
 
         }
 
+        /* istanbul ignore else */
         if ((capturingListeners && capturingListeners.length > 0) || (listeners && listeners.length > 0)) {
             let {target, eventDriver} = constructDriver(e);
             eventDriver.passive = passive;
@@ -584,6 +604,7 @@ let
     */
     passiveEventListenerRouter = function(e) {
         //if event has not been handled, handle it
+        /* istanbul ignore else */
         if (typeof e.pEventId === 'undefined') {
             e.pEventId = eventStates.eventId;
             executeEventStateListenersRoute(e, eventStates.capturePhasePassiveEventListeners, eventStates.passiveEventListeners, true);
@@ -596,6 +617,7 @@ let
     */
     eventListenerRouter = function(e) {
         //if event has not been handled, handle it
+        /* istanbul ignore else */
         if (typeof e.eventId === 'undefined') {
             e.eventId = eventStates.eventId;
             executeEventStateListenersRoute(e, eventStates.capturePhaseEventListeners, eventStates.eventListeners);
@@ -612,17 +634,20 @@ let
     bindListener = function(type, config) {
         let router = config.passive? passiveEventListenerRouter : eventListenerRouter;
 
-        //bind on root document
-        root.addEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
-            passive: config.passive,
-            capture: true
-        }: true);
+        let thirdParam = true;
 
-        //bind on window object
-        host.addEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
-            passive: config.passive,
-            capture: true
-        }: true);
+        /* istanbul ignore if */
+        if (eventStates.hasPassiveEventListenerSupport)
+            thirdParam = {
+                passive: config.passive,
+                capture: true
+            };
+
+        //bind on root document
+        root.addEventListener(type, router, thirdParam);
+
+        //bind on host window object
+        host.addEventListener(type, router, thirdParam);
     },
 
     /**
@@ -635,15 +660,18 @@ let
     unbindListener = function(type, config) {
         let router = config.passive? passiveEventListenerRouter : eventListenerRouter;
 
-        root.removeEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
-            passive: config.passive,
-            capture: true
-        }: true);
+        let thirdParam = true;
 
-        host.removeEventListener(type, router, eventStates.hasPassiveEventListenerSupport? {
-            passive: config.passive,
-            capture: true
-        }: true);
+        /* istanbul ignore if */
+        if (eventStates.hasPassiveEventListenerSupport)
+            thirdParam = {
+                passive: config.passive,
+                capture: true
+            };
+
+        root.removeEventListener(type, router, thirdParam);
+
+        host.removeEventListener(type, router, thirdParam);
     },
 
     /**
@@ -669,7 +697,9 @@ let
 
         Object.defineProperty(accessor, 'passive', {
             get() {
+                /* istanbul ignore next */
                 eventStates.hasPassiveEventListenerSupport = true;
+                /* istanbul ignore next */
                 return true;
             }
         });
@@ -979,6 +1009,7 @@ let
             });
 
         //resolve browser prefixes
+        /* istanbul ignore else */
         if (prefix)
             eventTypes.forEach((eventType) => {
                 let prefixedType = eventType.replace('transition', 'transition-');
@@ -1048,6 +1079,7 @@ let
             });
 
         //resolve browser prefixes
+        /* istanbul ignore else */
         if (prefix) {
             keyframePrefix = '-' + prefix;
             eventTypes.forEach((eventType) => {
