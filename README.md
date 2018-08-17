@@ -401,3 +401,217 @@ class Employees extends Queue {
     }
 }
 ```
+
+## Xhr Module
+
+This is an `XMLHttpRequest` [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) based implementation of [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)  with inbuilt request prioritization and polling manager. It exposes similar features as offered by [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request), [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response), and [Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) API.
+
+Unlike in [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) that rejects only on network error, the **Xhr** module rejects all responses whose status code does not fall withing the `200` mark and is not a [304, Not Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304) status code.
+
+**Making a simple fetch call**:
+
+```javascript
+Xhr.fetch(url).then(response => {
+    console.log(response.ok); // true
+})
+    .catch(response => {
+        let message = '';
+        switch (response.statusCode) {
+            case 404:
+                message = 'Resource not found';
+                break;
+            //more test cases follows
+        }
+    });
+```
+
+**Restful methods**:
+
+By default, the fetch method uses `GET` method for requests, unless a second options object is passed in. You can make use of restful methods that are already made available.
+
+```javascript
+type requestOptions = {
+    method?: string,
+    responseType?: 'json'|'document'|'blob'|'arraybuffer',
+    data?: {}|FormData,
+    cache?: 'no-cache'|'force-cache'|'only-if-cached'|'default'|'reload',
+    priority?: number,
+    withCredentials?: boolean,
+    timeout?: number|null,
+    contentType: string,
+    progress?: ((loaded: number, total: number) => void),
+    headers?: {}
+};
+
+//universal
+Xhr.fetch(url: string, options?: requestOptions);
+
+//make GET request
+Xhr.get(url: string, options?: requestOptions);
+
+//make POST request
+Xhr.post(url: string, options?: requestOptions);
+
+//make PUT request
+Xhr.put(url: string, options?: requestOptions);
+
+//make HEAD request
+Xhr.head(url: string, options?: requestOptions);
+
+//make DELETE request
+Xhr.delete(url: string, options?: requestOptions);
+
+//make OPTIONS request
+Xhr.options(url: string, options?: requestOptions);
+```
+
+**Set Custom Global Request headers**:
+
+To set custom global headers that is sent along with every request, use `Xhr.addHeader(name, value)` or `Xhr.addHeaders(headers)` methods. This is handy for setting global headers such as `X-CSRF-TOKEN`, `X-Requested-With`.
+
+```javascript
+//the calls are chainable
+Xhr.addHeader('X-Requested-With', 'XMLHttpRequest').addHeaders({
+    'X-CSRF-TOKEN': 'token'
+});
+```
+
+To remove already set global headers, use `Xhr.removeHeader(headerName)` and `Xhr.removeHeaders(...headerNames)` methods.
+
+```javascript
+Xhr.removeHeaders('X-Requested-With', 'X-CSRF-TOKEN');
+```
+
+**Specify Request data through `options.data`**:
+
+You can specify request data to send by passing in an `options.data` parameter. The parameter can either be a plain object containing data `key:value` pairs or a [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+
+For [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST) & [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) operations, the data is transmitted through the request body. For other methods, the data is transmitted through the url as encoded `query` parameters (only plain objects are accepted in this case).
+
+```javascript
+//use form data
+let data = new FormData(), //we could just pass in the form to the constructor.
+    elements = document.forms['frm-signup'];
+
+data.append('username', elements.username.value);
+data.append('email', elements.email.value);
+data.append('password', elements.password.value);
+
+let options = {
+    data: data,
+    responseType: 'json'
+};
+
+Xhr.post('user/create', options).then(response => {
+    if (response.json().status === 'success')
+        console.log('account created');
+    else
+        console.log(response.json().errors);
+});
+```
+
+**Access Response headers. `Response#getHeader(name)` & `Response#getHeaders(camelize?`**:
+
+To access response headers, there are `getHeader(name)` & `getHeaders(camelize?)` methods on the passed in [Response](#response) instance.
+
+The former returns the value for a given header while the latter returns all the response headers in one go, as an object of header `name:value` pairs.
+
+The `camelize` optional boolean parameter specifies if the header names should be turned into camel cases, allowing one to use the `.` notation when accessing headers. The default value is `true`.
+
+```javascript
+//get resource meta headers
+Xhr.head('rss-feed.xml').then(response => {
+    response.getHeader('Last-modified');
+
+        //OR
+
+    let headers = response.getHeaders();
+    console.log(headers.contentType, headers.contentLength, headers.etag);
+
+        //OR
+
+    //get headers without camelizing the names.
+    //all headers are in lowercase
+    headers = response.getHeaders(false);
+    console.log(headers['content-type'], headers['content-length'], headers['etag']);
+});
+```
+
+**Alter Request execution order through `options.priority`**:
+
+For a large application that has lots of requests to poll, one may decide to prioritize request polling based on their importance. For such scenerio, the `options.priority` method becomes handy. Note that the lower the assigned priority value, the more prioritized the request will be.
+
+```javascript
+/**
+* here, we want to specify the order of request execution whenever there are
+* requests for chat messages, news feeds, notifications, birthdays, likes,
+* comments, etc
+*/
+Xhr.get('/feeds', {priority: 10});
+Xhr.get('/messages', {priority: 4}); //more prioritized than feeds
+Xhr.get('/post/id/comments', {priority: 5}); //less important than messages but more
+//important than feeds
+...
+```
+
+>Note that it has a way of balancing stuffs by promoting a request's `priority` level one step forward after the `request` has stayed in the queue for some determined number of milliseconds (the `promoteAfter` options which defaults `3000ms`). To change this value, use `Xhr.promoteAfter = msValue`.
+
+**Alter how Response is Parsed through `options.responseType`**:
+
+The `options.responseType` parameter specifies how the resulting `response` should be parsed regardless of the response `content-type` header. Accepted values includes `json`, `document`, `blob`, and `arraybuffer`.
+
+```javascript
+//fetch an html document
+Xhr.get('/about.html', {responseType: 'document'}).then(response => {
+    console.log(response.document.title);
+});
+```
+
+>Note that by default, the module will parse response as [JSON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON) if the response `content-type` header matches either of `application/json` or `text/json`.
+
+**Watch for Request Progress through `options.progress`**:
+
+To watch for progress events, simply pass in an options.progress callback parameter. The callback should accept two parameters, `loaded` & `total` data to load.
+
+Usage could be to update a progress bar as below:
+
+*HTML*:
+
+```html
+<div class="progress-bar" id="progress-bar">
+    <div class="bar"></div>
+</div>
+```
+
+*SCSS*:
+
+```scss
+.progress-bar {
+    position: relative;
+    background: grey;
+    height: 30px;
+
+    > .bar {
+        display: absolute;
+        background-color: blue;
+        left: 0;
+        width: 0;
+        height: 100%;
+        transition: width 0.15s ease;
+    }
+}
+```
+
+*JavaScript*:
+
+```javascript
+let progressBar = document.getElementById('progress-bar');
+Xhr.post(url, {
+    data: dataToPost,
+    progress: (loaded, total) => {
+        //update progress bar.
+        let percent = (loaded / total) * 100;
+        progressBar.style.width = `${percent}%`;
+    }
+});
+```
