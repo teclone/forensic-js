@@ -17,6 +17,33 @@ import TouchDriver from './Event/Drivers/TouchDriver.js';
 import WheelDriver from './Event/Drivers/WheelDriver.js';
 import InputDriver from './Event/Drivers/InputDriver.js';
 
+/**
+ *@typedef {Object} BindEventOptions
+ *@property {boolean} [BindEventOptions.passive=false] - boolean value indicating if listener
+ * should be bound in passive or non passive mode. defaults to false
+ *@property {boolean} [BindEventOptions.capture=false] - boolean value indicating if listener should be
+ * bound to the capturing phase. defaults to false
+ *@property {boolean} [BindEventOptions.runLast=false] - boolean value indicating if listener should
+ * be executed last. defaults to false
+ *@property {boolean} [BindEventOptions.runFirst=false] - boolean value indicating if listener should
+ * be executed first. defaults to false
+ *@property {boolean} [BindEventOptions.runOnce=false] - boolean value indicating if listener should
+ * run only once. defaults to false
+ *@property {number} [BindEventOptions.priority=5] - integer value indicating listener execution
+ * priority level. defaults to 5
+ *@property {boolean} [BindEventOptions.acceptBubbledEvents=true] - set to false if you only want the
+ * listener callback to be executed when the event origin is the target given. Bubbled
+ * events will not trigger execution if set to false.
+*/
+
+/**
+ *@typedef {Object} UnbindEventOptions
+ *@property {boolean} [UnbindEventOptions.bindPassive=false] - boolean value indicating if listener
+ * was bound in passive or non passive mode. defaults to false
+ *@property {boolean} [UnbindEventOptions.capture=false] - boolean value indicating if listener was
+ * bound to the capturing phase. defaults to false
+*/
+
 const EVENT_DRIVERS = [
     // Driver interface
     {
@@ -108,8 +135,9 @@ let
      *event driver classes
     */
     driverClasses = {
-        Driver, CustomDriver, UIDriver, FocusDriver, MouseDriver, TransitionDriver,
-        AnimationDriver
+        Driver, CustomDriver, TransitionDriver, AnimationDriver, UIDriver, FocusDriver,
+        MouseDriver, CompositionDriver, HashChangeDriver, PageTransitionDriver, PopStateDriver,
+        KeyboardDriver, TouchDriver, WheelDriver, InputDriver
     },
 
     /**
@@ -813,31 +841,13 @@ let eventModule = {
 
     /**
      * binds event listener for a specified event type(s) on a given event target.
-     *
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
-     *@param {Object} [config] - optional configuration object
-     *@param {boolean} [config.passive=false] - boolean value indicating if listener
-     * should be bound in passive or non passive mode. defaults to false
-     *@param {boolean} [config.capture=false] - boolean value indicating if listener should be
-     * bound to the capturing phase. defaults to false
-     *@param {boolean} [config.runLast=false] - boolean value indicating if listener should
-     * be executed last. defaults to false
-     *@param {boolean} [config.runFirst=false] - boolean value indicating if listener should
-     * be executed first. defaults to false
-     *@param {boolean} [config.runOnce=false] - boolean value indicating if listener should
-     * run only once. defaults to false
-     *@param {number} [config.priority=5] - integer value indicating listener execution
-     * priority level. defaults to 5
-     *@param {boolean} [config.acceptBubbledEvents=true] - set to false if you only want the
-     * listener callback to be executed when the event origin is the target given. Bubbled
-     * events will not trigger execution if set to false.
+     *@param {BindEventOptions} [config] - optional event binding configuration object
      *@param {Object} [scope] - scope execution object. defaults to host object
-     *@param {...*} [parameters] - comma separated list of parameters to pass to listener
-     * during execution
-     *@throws {Error|TypeError} if listener is not a function, or if the dom is not yet loaded
-     * and ready
+     *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
      *@returns {this}
     */
     bind(type, callback, target, config, scope, ...parameters) {
@@ -859,18 +869,47 @@ let eventModule = {
     },
 
     /**
-     * unbinds event listener for specified event type(s) on a given event target.
-     *
+     * binds event listener for a specified event type(s) on a given event target.
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
-     *@param {Object} [config] - optional configuration object
-     *@param {boolean} [config.bindPassive=false] - boolean value indicating if listener
-     * was bound in passive or non passive mode. defaults to false
-     *@param {boolean} [config.capture=false] - boolean value indicating if listener was
-     * bound to the capturing phase. defaults to false
-     *@throws {Error|TypeError} if listener is not a function, or if the dom is not yet loaded
-     * and ready
+     *@param {BindEventOptions} [config] - optional event binding configuration object
+     *@param {Object} [scope] - scope execution object. defaults to host object
+     *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
+     *@returns {this}
+    */
+    on(type, callback, target, config, scope, ...parameters) {
+        return this.bind(type, callback, target, config, scope, ...parameters);
+    },
+
+    /**
+     * binds run once event listener for a specified event type(s) on a given event target.
+     *@param {string|string[]} type - event type or array of event types
+     *@param {Function} callback - event listener callback
+     *@param {EventTarget} target - event target object
+     *@param {BindEventOptions} [config] - optional event binding configuration object
+     *@param {Object} [scope] - scope execution object. defaults to host object
+     *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
+     *@returns {this}
+    */
+    once(type, callback, target, config, scope, ...parameters) {
+        if (Util.isPlainObject(config))
+            config.runOnce = true;
+        else
+            config = {runOnce: true};
+
+        return this.bind(type, callback, target, config, scope, ...parameters);
+    },
+
+    /**
+     * unbinds event listener for specified event type(s) on a given event target.
+     *@param {string|string[]} type - event type or array of event types
+     *@param {Function} callback - event listener callback
+     *@param {EventTarget} target - event target object
+     *@param {UnbindEventOptions} [config] - optional event unbind configuration object
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
      *@returns {this}
     */
     unbind(type, callback, target, config) {
@@ -892,17 +931,24 @@ let eventModule = {
     },
 
     /**
+     * unbinds event listener for specified event type(s) on a given event target.
+     *@param {string|string[]} type - event type or array of event types
+     *@param {Function} callback - event listener callback
+     *@param {EventTarget} target - event target object
+     *@param {UnbindEventOptions} [config] - optional event unbind configuration object
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
+     *@returns {this}
+    */
+    off(type, callback, target, config) {
+        return this.unbind(type, callback, target, config);
+    },
+
+    /**
      * unbinds all event listeners for specified event type(s) on a given event target.
-     *
      *@param {string|string[]} type - event type or array of event types
      *@param {EventTarget} target - event target object
-     *@param {Object} [config] - optional configuration object
-     *@param {boolean} [config.bindPassive=false] - boolean value indicating if listener
-     * was bound in passive or non passive mode. defaults to false
-     *@param {boolean} [config.capture=false] - boolean value indicating if listener was
-     * bound to the capturing phase. defaults to false
-     *@throws {Error|TypeError} if listener is not a function, or if the dom is not yet loaded
-     * and ready
+     *@param {UnbindEventOptions} [config] - optional event unbind configuration object
+     *@throws {Error|TypeError} if target is not a valid event target
      *@returns {this}
     */
     unbindAll(type, target, config) {
@@ -918,6 +964,18 @@ let eventModule = {
                 unbindListener(type, xConfig);
         });
         return this;
+    },
+
+    /**
+     * unbinds all event listeners for specified event type(s) on a given event target.
+     *@param {string|string[]} type - event type or array of event types
+     *@param {EventTarget} target - event target object
+     *@param {UnbindEventOptions} [config] - optional event unbind configuration object
+     *@throws {TypeError} if listener is not a function or if target is not a valid event target
+     *@returns {this}
+    */
+    offAll(type, target, config) {
+        return this.unbindAll(type, target, config);
     },
 
     /**
