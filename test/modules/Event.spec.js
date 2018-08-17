@@ -677,6 +677,44 @@ describe('Event module', function() {
         });
     });
 
+    describe('.on(type, callback, target, config?, scope?, ...parameters?)', function() {
+        it(`should bind an event listener callback for the given event type(s) on the given
+            event target. It is an aliase for the bind method`, function(done) {
+
+            let callback = function() {
+                done();
+            };
+
+            _Event.on('click', callback, testDiv, {
+                runOnce: true
+            })
+
+                .dispatch('click', testDiv);
+        });
+    });
+
+    describe('.once(type, callback, target, config?, scope?, ...parameters?)', function() {
+        it(`should bind a run once event listener callback for the given event type(s) on the given
+            event target`, function() {
+
+            let callCount = 0;
+
+            _Event.once('click', function() {
+                callCount += 1;
+            }, testDiv)
+
+                .once('click', function() {
+                    callCount += 1;
+                }, testDiv, {priority: 3})
+
+                .dispatch('click', testDiv)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+        });
+    });
+
     describe('.unbind(type, callback, target, config?)', function() {
         it(`should unbind an event listener callback for the given event type(s) on the given
             event target that was bound in the same passed in config phase and passive state.
@@ -788,6 +826,25 @@ describe('Event module', function() {
             }).dispatch('touchstart', testDiv);
 
             expect(called).to.be.false; // shows that it was removed
+        });
+    });
+
+    describe('.off(type, callback, target, config?)', function() {
+        it(`should unbind an event listener callback for the given event type(s) on the given
+            event target that was bound in the same passed in config phase and passive state.
+            It is an aliase for the bind method`, function() {
+            let callCount = 0;
+            let callback = function() {
+                callCount += 1;
+            };
+
+            _Event.on('click', callback, testDiv)
+                .dispatch('click', testDiv)
+
+                .off('click', callback, testDiv)
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
         });
     });
 
@@ -946,6 +1003,36 @@ describe('Event module', function() {
                 .dispatch('touchstart', testDiv);
 
             expect(called).to.be.false; // shows that it was removed
+        });
+    });
+
+    describe('.offAll(type, target, config?)', function() {
+        it(`should unbind all event listeners for the given event type(s) on the given
+            event target that are running in the same phase and passive state. It is an aliase
+            for the unbindAll method`, function() {
+
+            let callCount = 0;
+
+            let listener1 = function() {
+                    callCount += 1;
+                },
+                listener2 = function() {
+                    callCount += 1;
+                };
+
+            _Event.on('click', listener1, testDiv)
+
+                .on('click', listener2, testDiv)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
+
+            _Event.offAll('click', testDiv)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(2);
         });
     });
 
