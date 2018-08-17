@@ -402,6 +402,321 @@ class Employees extends Queue {
 }
 ```
 
+## Event Module
+
+The `Event` module abstracts away `dom` and `custom` event handling logic from the browser and stops the browser from propagating events down and up the document tree. It does this by registering just two event listeners on the `host` & `root` object, and calls `event.stopPropagation()` at those top levels.
+
+It then handles the event propagations internally, taking care of `capturing phase` listeners, `passive` listeners, `runOnce` listeners, `target phase only` listeners, listeners' `priority` run order and lots more.
+
+The rationale behind this module is to:
+
+1. Provide unified interface for cross platform event handling, providing pollyfill for unimplemented Event interfaces such as [Pointer Events](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent), [Input Events](https://www.w3.org/TR/uievents/#events-inputevents), etc.
+
+2. Remove the hazzle associated with binding listeners for vendor prefixed events such as [Animation](https://www.w3.org/TR/css-animations-1/#events) and [Transition](https://www.w3.org/TR/css-transitions-1/#transition-events) events. You simply specify the event type such as `transitionend` without worrying about the accurate vendor prefixed type.
+
+3. Remove the hazzle associated with some browsers dispatching certain events on `window` while others dispatch same on the `document`. You choose where to register the handler, `document` or  `window`. It takes care of it.
+
+4. Offer ability to unbind even annonymous functions throught `Event.unbindAll(type, target, config)` method.
+
+5. Prevent the browser from dispatching incessant event and from performing `dom tree walk` while propagating events.
+
+6. Offer ability to alter the order of execution of event listeners through the `config.priority`, `config.runFirst`, and `config.runLast` flags.
+
+7. Offer a centralized system where events are handled, throttled (resize and scroll events), rejected or debounced.
+
+> **NB:** When binding events using vanilla JavaScript or other Event libraries, you should disable this module from stopping the browser from propagating events. To do this, set the `.silenceEvents` property to false. i.e `Event.silenceEvents = false`.
+
+**Listening for DOM Ready Event**:
+
+To run a callback once the document is ready, use the `.ready(callback, scope?, ...parameters?)` method. You can register multiple callback functions by calling this method multiple times. It is chainable.
+
+```javascript
+Event.ready((e) => {
+    console.log('document is ready');
+})
+    .ready((e) => {
+        console.log('second call');
+    });
+```
+
+You can as well pass in a `scope` object as a second parameter, as well as extra comma separated list of parameters to pass to `callback` function during execution.
+
+**Binding Event Listeners**:
+
+To bind event listeners, there is the `.bind()` && `.on()` methods that binds an `event` listener callback for a given set of event `type(s)` on a given event `target`.
+
+```javascript
+//method signature
+E.bind(
+    type: string|string[],
+    callback: ((event: Event, ...args?: any[]) => void),
+    target: EventTarget,
+    config?: EventConfigOptions|null,
+    scope?: {}|null,
+    ...parameters?: any[]
+);
+
+let testDiv = document.getElementById('my-div');
+
+//click event listener
+Event.bind('click', (e) => {
+    console.log(e.type);
+}, testDiv)
+
+    .on('click', (e) => {
+        console.log(e.type);
+    }, testDiv)
+
+    .dispatch('click', testDiv); //trigger the click event.
+```
+
+**Binding RunOnce Event Listeners**:
+
+To bind event listener callbacks that will only get executed once, set the boolean `config.runOnce` parameter to `true` or use the `once()` bind method
+
+```javascript
+let testImage = new Image();
+
+Event.bind('load', (e) => {
+    console.log('image is loaded');
+}, testImage, {runOnce: true})
+
+    .once('load', (e) => {
+        console.log('image is loaded');
+    }, testImage);
+
+testImage.src = 'image.png';
+```
+
+**Binding Listeners on the Capturing Phase**:
+
+To bind event listener callback that will get executed in the capturing phase, set the boolean `config.capture` parameter to `true`. The default value is `false`.
+
+```javascript
+Event.once('click', (e) => {
+    console.log(e.phase); //logs 1
+}, document.body, {capture: true})
+
+    .dispatch('click', document.body.firstElementChild);
+```
+
+> **NB**. Event listeners bound on the capturing phase are not executed for events that originated from the target. Events that originated from the target will be on the `target phase` by the time it reaches the `target` element.
+
+**Binding Listener on the target Phase Only**:
+
+To bind event listener callbacks that will get executed for only events that originated from the target, set the boolean `config.acceptBubbledEvents` parameter to `false`. The default value is `true`.
+
+```javascript
+let testDiv = document.createElement('div');
+document.body.appendChild(testDiv);
+
+let callCount = 0,
+
+    callback = function() {
+        callCount += 1;
+    };
+
+_Event.bind('click', callback, document.body, {
+    acceptBubbledEvents: false
+})
+
+    .dispatch('click', testDiv) // this event should not trigger the callback
+
+    .dispatch('click', document.body) // this event should trigger the callback
+
+    .unbind('click', callback, document.body);
+
+console.log(callCount); //logs 1
+```
+
+Only the second event `dispatch` will trigger the `listener`. The first event `dispatch` will not despite bubbling up to the testDiv parent element (`document.body`).
+
+**Binding Passive Event Listeners**:
+
+Passive event listeners are event listeners that is not supposed to call `preventDefault()`, thereby telling the browser before hand to keep updating the `UI` and not wait for the listener to finish executing.
+
+To use this feature, set the boolean `config.passive` parameter to `true`. The default value is `false`. Passive event listeners are great for events like `touch events`, and `wheel events`. To learn more about passive events, and web scroll performance check this [google developers article](https://blog.chromium.org/2016/05/new-apis-to-help-developers-improve.html).
+
+```javascript
+Event.on('touchstart', (e) => {
+    console.log(e.passive); //logs true.
+    e.preventDefault(); // not acceptable. throws error
+}, document.body, {
+    passive: true
+});
+```
+
+**Alter the Execution Order of Event Listeners**:
+
+The `Event` module makes it possible and easy to alter the execution order of event listeners, thanks to the power afforded to it by the [Queue](#queue-module) module. By using this feature, you can achieve a great effect as you dictate how `event` listeners are to be executed.
+
+1. **Alter Through The `config.priority` Option**:
+
+    By specifying a `priority` value for a listener callback during the bind process, we can alter its execution in the midst of other bound listeners, like below:
+
+    ```javascript
+    let signatures = [],
+    testImage = new Image(300, 500);
+
+    let firstListener = function() {
+            signatures.push('first');
+        },
+
+        secondListener = function() {
+            signatures.push('second');
+        },
+
+        thirdListener = function() {
+            signatures.push('third');
+        };
+
+    Event.bind('load', firstListener, testImage, {
+        priority: 9 // gets executed last after callback with default priority of 5
+    })
+
+        .on('load', secondListener, testImage) //default priority of 5 is assigned.
+
+        .on('load', thirdListener, testImage, {
+            priority: 1 //gets executed first.
+        })
+
+        .dispatch('load', testImage)
+
+        .unbindAll('load', testImage); //unbind  all the load event listeners
+
+    console.log(signatures.join('>>')); //logs third>>second>>first
+    ```
+
+    > **NB:** Priority values are rated higher in descending order. priority value of `3` is rated higher than priority value of `10` for instance.
+
+2. **Alter Through The `config.runFirst` Option**:
+
+    By setting the `runFirst` option to `true`, on a listener callback during the bind process, You are asking that the listener should be executed first in the midst of other listeners along the chain of the event target.
+
+    Note that, when there are two or more listeners with the `runFirst` flag set to `true`, their `priority` values will be used.
+
+    ```javascript
+    let signatures = [],
+        testInput = document.createElement('input');
+    testInput.type = 'text';
+
+    let firstListener = function() {
+            signatures.push('first');
+        },
+
+        secondListener = function() {
+            signatures.push('second');
+        },
+
+        thirdListener = function() {
+            signatures.push('third');
+        };
+
+    Event.on('keydown', firstListener, testInput) // priority defaults to 5. gets executed last
+
+        .on('keydown', secondListener, testInput, {
+            priority: 3 //gets executed immediately after the thirdListener.
+        })
+
+        .on('keydown', thirdListener, testInput, {
+            priority: 10,
+            runFirst: true //gets executed first due to the runFirst config despite having
+            //the least priority
+        })
+
+        .dispatch('keydown', testInput)
+
+        .offAll('keydown', testInput); //unbind all the keydown event listeners
+
+    console.log(signatures.join('>>')); //logs third>>second>>first
+    ```
+
+3. **Alter Through The `config.runLast` Option**
+
+    By setting the `runLast` option to `true`, on a listener callback during the bind process, You are asking that the listener should be executed last in the midst of other listeners along the chain of the event target.
+
+    Note that, when there are two or more listeners with the `runLast` flag set to `true`, their `priority` values will be used.
+
+    ```javascript
+    let signatures = [],
+        testInput = document.createElement('input');
+    testInput.type = 'text';
+
+    let firstListener = function() {
+            signatures.push('first');
+        },
+
+        secondListener = function() {
+            signatures.push('second');
+        },
+
+        thirdListener = function() {
+            signatures.push('third');
+        };
+
+    Event.bind('focus', firstListener, testInput, {
+        priority: 1,
+        runLast: true // gets executed just before the secondListener, because of the
+        //priority difference though both are configured to run last.
+    })
+
+        .bind('focus', secondListener, testInput, {
+            runLast: true //gets executed last. it priority is defaulted to 5
+        })
+
+        .bind('focus', thirdListener, testInput, {
+            priority: 10 //gets executed first. despite having the least priority.
+            //This is because other listeners have been configured to run last.
+        })
+
+        .dispatch('focus', testInput)
+
+        .unbindAll('focus', testInput); //unbind all the focus event listeners
+
+    console.log(signatures.join('>>')); //logs third>>first>>second
+    ```
+
+**Specifying Execution Scope and Extra Parameters**:
+
+You can specify an execution scope object as a fifth parameter. If specified, the `this` object inside the listener will refer to the object rather than the event `target`.
+
+```javascript
+let isAccurateScope = false,
+    scope = {id: 'testing scope'};
+
+let callback = function() {
+    if (this === scope)
+        isAccurateScope = true;
+};
+
+Event.bind('copy', callback, document, {
+    runOnce: true
+}, scope)
+
+    .dispatch('copy', document);
+
+console.log(isAccurateScope); // logs true
+```
+
+You can also pass in additional **comma separated** list of parameters that will be sent to the listener callback.
+
+```javascript
+let list = [];
+
+let callback = function(e, param1, param2, param3) {
+    list.push(param1, param2, param3);
+};
+
+_Event.once('pagehide', callback, window, null, null, 1, 2, 3)
+/**            ^^^       ^^^^^^   ^^^^^^  ^^^^^ ^^^^^ ^^^^^^^
+ *              ||          ||       ||     ||     ||     ||
+               type      listener  target config scope parameters
+**/
+    .dispatch('pagehide', document); //trigger on document, it will bubble to window
+
+console.log(list.join('>>')); //logs 1>>2>>3
+```
+
 ## Xhr Module
 
 This is an `XMLHttpRequest` [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) based implementation of [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)  with inbuilt request prioritization and polling manager. It exposes similar features as offered by [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request), [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response), and [Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers) API.
