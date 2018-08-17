@@ -94,11 +94,11 @@ import XML from './node_modules/forensic-js/lib/modules/XML.js';
 
 The `Globals` module provides unified global variables that all other modules use which include the host (`window`) and root (`document`) objects. The purpose is to make all other library modules independent of runtime environment, and to make component testing easy.
 
-It provides the `install`, and `uninstall` methods, which are used to set and unset the window & document objects (which can come from an `iframe`, `node-jsdom`, `topmost window`, etc.) on a global level respectively.
+It provides the `install` methods, which are used to set the window & document objects (which can come from an `iframe`, `node-jsdom`, `topmost window`, etc.) on a global level respectively.
 
-All modules provide the `install` and `uninstall` methods, when used separately.
+All modules provide the `install` method, when used separately.
 
-**Using `FJS` in `node.js`**:
+**Using `FJS` in Node.js**:
 
 ```javascript
 import * as FJS from 'forensic-js';
@@ -112,7 +112,7 @@ import XML from './node_modules/forensic-js/lib/XML.js';
 XML.install(dom.window, dom.window.document);
 ```
 
-The Globals module performs a check for the presence of a `window` and `document` objects, and installs them if both are found. Hence there is no need to call the `install(host, root)` method when running in a browser.
+The Globals module checks for the presence of a `window` and `document` objects, and installs them if both are found. Hence there is no need to call the `install(host, root)` method when running in a browser.
 
 **Automatically Detect Objects**:
 
@@ -274,8 +274,7 @@ Xhr.get('/employees').then((response) => {
 function writeRow(target: HTMLTableSectionElement, ...cellValues: any[]) {
     let row = target.insertRow();
     cellValues.forEach(cellValue => {
-        let cell = row.insertCell()
-        .appendChild(document.createTextNode(cellValue));
+        row.insertCell().appendChild(document.createTextNode(cellValue));
     });
 };
 
@@ -929,4 +928,84 @@ Xhr.post(url, {
         progressBar.style.width = `${percent}%`;
     }
 });
+```
+
+## XML Module
+
+The **XML Module** unifies **Internet Explorer** `ActiveXObject` XML implementation and `DOMImplementation.createDocument()`  patterns.
+
+It provides support for IE specific xml methods and properties , including `loadXML` method, `parseError`, `xml`, and `text` properties.
+
+It is promise-based as both the `load(url)` & `loadXML(xmlString)` methods return promises.
+
+**Usage sample:**
+
+```javascript
+new XML().load(url).then(xmlDoc => {
+    console.log(xmlDoc.xml); //logs the serialized xml document
+    console.log(xmlDoc.text); //logs the text content of the xml document
+
+    //get some nodes
+    xmlDoc.getElementsByTagName('element-tag');
+    ......
+})
+    .catch(xmlDoc => {
+        console.log(xmlDoc.parseError.reason);
+    });
+```
+
+**Creating XML**:
+
+```javascript
+//signature
+new XML(qualifiedName?: string, namespaces?: {}, documentType?: DocumentType);
+
+let namespaces = {
+    default: 'http://www.w3.org/ns',
+    svg: 'http://www.w3.org/2000/svg',
+    html: 'http://www.w3.org/1999/xhtml'
+};
+
+let xml = new XML('root', namespaces);
+
+console.log(xml.xml);
+//<root xmlns="http://www.w3.org/ns" xmlns:svg="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" />
+```
+
+## XPath Module
+
+The `XPath` module provides interface for running xpath selection on a given valid `xml` node with support for namespacing. It  unifies IE ActiveXObject `selectNode`, `selectNodes`, & domimplementations `document.evaluate` methods.
+
+**Usage example**:
+
+```javascript
+import {XML, XPath} from 'forensic-js';
+
+let xmlString = `
+    <?xml version="1.0" encoding="utf-8" ?>
+    <students xmlns="http://student.org/ns">
+        <student>
+            <name>Harrison Ifeanyichukwu</name>
+            <class>JSS3</class>
+            <rating>0.7</rating>
+        </student>
+        <student>
+            <name>Helen Brown</name>
+            <class>JSS3</class>
+            <rating>0.9</rating>
+        </student>
+    </students>
+`;
+
+let namespaces = {
+    st: 'http://student.org/ns'
+};
+
+let xmlDoc = new XML().loadXML(xmlString);
+
+//run selection from the document context
+XPath.selectNode('st:students/st:student/st:name', xmlDoc, namespaces);
+
+//run selection from the documentElement context
+XPath.selectNodes('st:students/st:student/st:name', xmlDoc.documentElement, namespaces);
 ```
