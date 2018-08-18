@@ -3,7 +3,7 @@
  * this module defines a bunch of utility functions that will be relevant to most other modules
  *@module Util
 */
-import {toString, host, root, install, uninstall} from './Globals.js';
+import {toString, host, root, install} from './Globals.js';
 
 export default {
     /**
@@ -17,16 +17,6 @@ export default {
     */
     install(hostParam, rootParam) {
         return install(hostParam, rootParam);
-    },
-
-    /**
-     * calls the Globals uninstall method with the parameters. This is useful when using the
-     * Utils module as a standalone distribution or lib.
-     *
-     *@returns {boolean}
-    */
-    uninstall() {
-        return uninstall();
     },
 
     /**

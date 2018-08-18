@@ -22,13 +22,6 @@ describe('XPath module', function() {
         });
     });
 
-    describe('.uninstall()', function() {
-        it('should call the global uninstall method', function() {
-            expect(XPath.uninstall()).to.be.true;
-            expect(XPath.install(window, document)).to.be.true;
-        });
-    });
-
     describe('.supported', function() {
         it('it should hold a boolean value that indicates if XPath is supported', function() {
             expect(XPath.supported).to.be.true;

@@ -21,13 +21,6 @@ describe('XML module', function() {
         });
     });
 
-    describe('.uninstall()', function() {
-        it('should call the global uninstall method', function() {
-            expect(XML.uninstall()).to.be.true;
-            expect(XML.install(window, document)).to.be.true;
-        });
-    });
-
     describe('.supported', function() {
         it('it should hold a boolean value that indicates if XML creation is supported', function() {
             expect(XML.supported).to.be.true;

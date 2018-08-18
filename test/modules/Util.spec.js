@@ -7,13 +7,6 @@ describe('Util module', function() {
         });
     });
 
-    describe('.uninstall()', function() {
-        it('should call the global uninstall method', function() {
-            expect(Util.uninstall()).to.be.true;
-            expect(Util.install(window, document)).to.be.true;
-        });
-    });
-
     describe('.isNumber(variable)', function() {
         it('should return true if argument is a number', function() {
             expect(Util.isNumber(3.2)).to.be.true;

@@ -1,7 +1,7 @@
 /**
  *@module Event
 */
-import { install, uninstall, host, root, onInstall, browserPrefixes } from './Globals.js';
+import { install, host, root, onInstall, browserPrefixes } from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
 import Driver from './Event/Drivers/Driver.js';
@@ -767,16 +767,6 @@ let eventModule = {
     */
     install(hostParam, rootParam) {
         return install(hostParam, rootParam);
-    },
-
-    /**
-     * calls the Globals uninstall method with the parameters. This is useful when using the
-     * Utils module as a standalone distribution or lib.
-     *@memberof Event
-     *@returns {boolean}
-    */
-    uninstall() {
-        return uninstall();
     },
 
     /**

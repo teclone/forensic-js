@@ -1,7 +1,7 @@
 /**
  *@module XML
 */
-import { onInstall, host, root, install, uninstall} from './Globals.js';
+import { onInstall, host, root, install} from './Globals.js';
 import Util from './Util.js';
 import Xhr from './Xhr.js';
 
@@ -331,16 +331,6 @@ export default class XML {
     */
     static install(hostParam, rootParam) {
         return install(hostParam, rootParam);
-    }
-
-    /**
-     * calls the Globals uninstall method with the parameters. This is useful when using the
-     * Utils module as a standalone distribution or lib.
-     *
-     *@returns {boolean}
-    */
-    static uninstall() {
-        return uninstall();
     }
 
     /**

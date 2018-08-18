@@ -27,13 +27,6 @@ describe('Event module', function() {
         });
     });
 
-    describe('.uninstall()', function() {
-        it('should call the global uninstall method', function() {
-            expect(_Event.uninstall()).to.be.true;
-            expect(_Event.install(window, document)).to.be.true;
-        });
-    });
-
     describe('.silenceEvents', function() {
         it (`should set or return the silence event current status when called as a setter
         or a getter. The silenceEvents status determines if the module will stop the browser

@@ -1,4 +1,4 @@
-export {install, uninstall} from './modules/Globals.js';
+export {install} from './modules/Globals.js';
 export {default as Util} from './modules/Util.js';
 export {default as Queue} from './modules/Queue.js';
 export {default as Event} from './modules/Event.js';

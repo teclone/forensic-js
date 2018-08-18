@@ -22,13 +22,6 @@ describe('Xhr', function() {
         });
     });
 
-    describe('.uninstall()', function() {
-        it('should call the global uninstall method', function() {
-            expect(Xhr.uninstall()).to.be.true;
-            expect(Xhr.install(window, document)).to.be.true;
-        });
-    });
-
     describe('.fetch(url, options?)', function() {
 
         it('should send request to the resource at the given url and return a promise', function() {

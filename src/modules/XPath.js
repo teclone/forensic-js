@@ -1,7 +1,7 @@
 /**
  *@module XPath
 */
-import { onInstall, host, install, uninstall } from './Globals.js';
+import { onInstall, host, install } from './Globals.js';
 import Util from './Util.js';
 import XML from './XML.js';
 
@@ -175,16 +175,6 @@ export default {
     */
     install(hostParam, rootParam) {
         return install(hostParam, rootParam);
-    },
-
-    /**
-     * calls the Globals uninstall method with the parameters. This is useful when using the
-     * Utils module as a standalone distribution or lib.
-     *
-     *@returns {boolean}
-    */
-    uninstall() {
-        return uninstall();
     },
 
     /**

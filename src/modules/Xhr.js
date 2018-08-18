@@ -3,7 +3,7 @@
  * request headers and lots more
  *@module Xhr
 */
-import {install, uninstall} from './Globals.js';
+import {install} from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
 import Transport from './XhrComponents/Transport.js';
@@ -174,16 +174,6 @@ export default {
     */
     install(hostParam, rootParam) {
         return install(hostParam, rootParam);
-    },
-
-    /**
-     * calls the Globals uninstall method with the parameters. This is useful when using the
-     * Utils module as a standalone distribution or lib.
-     *
-     *@returns {boolean}
-    */
-    uninstall() {
-        return uninstall();
     },
 
     /**
