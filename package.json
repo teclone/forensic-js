@@ -1,6 +1,6 @@
 {
   "name": "forensic-js",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "description": "a modular javascript that offers excellent event management, application state management, fetch api, and lots more",
   "main": "index.js",
   "scripts": {
@@ -16,11 +16,13 @@
     "prebuild": "rimraf dist && rimraf lib",
     "build": "BABEL_ENV=build rollup --config",
     "validate-doc": "documentation lint src/**",
-    "generate-doc": "rimraf docs/docs && documentation build src/** -f html -o docs/docs"
+    "generate-doc": "rimraf docs/docs && documentation build src/** -f html -o docs/docs",
+    "report-coverage": "nyc report --reporter=text-lcov | coveralls",
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/harrison-ifeanyichukwu/forensic-js.git"
+    "url": "https://github.com/harrison-ifeanyichukwu/forensic-js.git"
   },
   "author": "Harrison Ifeanyichukwu <Harrisonifeanyichukwu@gmail.com> (http://fjsfoundations.com/)",
   "license": "MIT",
@@ -35,6 +37,7 @@
     "babel-register": "6.26.0",
     "chai": "4.1.2",
     "commitizen": "2.10.1",
+    "coveralls": "3.0.2",
     "cz-conventional-changelog": "2.1.0",
     "documentation": "8.1.1",
     "istanbul": "0.4.5",
@@ -49,6 +52,7 @@
     "rollup-plugin-babel": "3.0.7",
     "rollup-plugin-node-resolve": "3.3.0",
     "rollup-plugin-uglify": "4.0.0",
+    "semantic-release": "^15.9.8",
     "wicked-good-xpath": "1.3.0"
   },
   "czConfig": {
