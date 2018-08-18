@@ -1,11 +1,6 @@
 /**
- * event initialization options.
- *@typedef {Object} TransitionEventInit
- *@property {boolean} [TransitionEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [TransitionEventInit.cancelable=false] - boolean value indicating if event is cancelable
- *@property {string} [TransitionEventInit.propertyName=''] - transition property name
- *@property {float} [TransitionEventInit.elapsedTime=0.0] - transition elapsed time
- *@property {string} [TransitionEventInit.pseudoElement=''] - transition pseudo element
+ *@module TransitionEventPollyfill
+ *@memberof EventPollyfills
 */
 import { createDOMEvent } from '../../Globals.js';
 
@@ -24,6 +19,8 @@ export default {
         }
 
         /**
+         *@constructor
+         *@memberof EventPollyfills.TransitionEventPollyfill#
          *@param {string} type - the event type
          *@param {TransitionEventInit} eventInit - the event init object
         */
@@ -36,6 +33,11 @@ export default {
             let event = createDOMEvent('Event', type, eventInit, ['bubbles', 'cancelable']);
 
             Object.defineProperties(event, {
+                /**
+                 *@memberof EventPollyfills.TransitionEventPollyfill#
+                 *@private
+                 *@type {string}
+                */
                 [Symbol.toStringTag]: {
                     get() {
                         return 'TransitionEvent';
@@ -43,6 +45,8 @@ export default {
                 },
 
                 /**
+                 * transition property
+                 *@memberof EventPollyfills.TransitionEventPollyfill#
                  *@type {string}
                 */
                 propertyName: {
@@ -52,6 +56,8 @@ export default {
                 },
 
                 /**
+                 * transition pseudo element
+                 *@memberof EventPollyfills.TransitionEventPollyfill#
                  *@type {string}
                 */
                 pseudoElement: {
@@ -61,6 +67,8 @@ export default {
                 },
 
                 /**
+                 * transition elapsed time in milliseconds
+                 *@memberof EventPollyfills.TransitionEventPollyfill#
                  *@type {number}
                 */
                 elapsedTime: {

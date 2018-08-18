@@ -1,10 +1,16 @@
 /**
  *@namespace XhrComponents
 */
+
+/**
+ *@module Response
+ *@memberof XhrComponents
+*/
 import Util from '../Util.js';
 
 /**
  * parses json content
+ *@private
  *@param {XMLHttpRequest|ActiveXObject} transport - the request transport object
  *@returns {Object}
 */
@@ -22,12 +28,10 @@ function parseJSON(transport) {
     return json;
 }
 
-/**
- *@memberof XhrComponents
-*/
 export default class {
     /**
      * creates a response object
+     *@memberof XhrComponents.Response#
      *@param {Request} request - the request
     */
     constructor(request) {
@@ -46,7 +50,7 @@ export default class {
 
     /**
      *@private
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
     */
     get [Symbol.toStringTag]() {
         return 'Response';
@@ -54,7 +58,7 @@ export default class {
 
     /**
      * boolean indicating if request status is within the 200 range
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@type {boolean}
     */
     get ok() {
@@ -70,7 +74,7 @@ export default class {
 
     /**
      * response status code
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@type {number}
     */
     get statusCode() {
@@ -79,7 +83,7 @@ export default class {
 
     /**
      * response status message
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@type {string}
     */
     get statusMessage() {
@@ -88,7 +92,7 @@ export default class {
 
     /**
      * returns http response header by the entry name
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {string} returns string or null if such header was not sent
     */
     getHeader(name) {
@@ -98,7 +102,7 @@ export default class {
 
     /**
      * returns all response headers as an object
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@param {boolean} [camelize=true] - boolean value indicating if the header keys should be
      * turned into camel case to make it easy to the dot (.) operator. like headers.headerName
      *@returns {Object}
@@ -121,7 +125,7 @@ export default class {
 
     /**
      * returns response as json object.
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {JSON}
     */
     json() {
@@ -130,7 +134,7 @@ export default class {
 
     /**
      * returns response as blob
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {Blob}
     */
     blob() {
@@ -139,7 +143,7 @@ export default class {
 
     /**
      * returns response as array buffer
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {ArrayBuffer}
     */
     arrayBuffer() {
@@ -148,7 +152,7 @@ export default class {
 
     /**
      * returns response parsed xml or html document
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {Document}
     */
     document() {
@@ -157,7 +161,7 @@ export default class {
 
     /**
      * returns response text
-     *@memberof Response#
+     *@memberof XhrComponents.Response#
      *@returns {string}
     */
     text() {

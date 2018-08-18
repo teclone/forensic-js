@@ -1,10 +1,6 @@
 /**
- * event initialization options.
- *@typedef {Object} InputEventInit
- *@property {boolean} [InputEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [InputEventInit.cancelable=false] - boolean value indicating if event is
- * cancelable
- *@property {boolean} [InputEventInit.persisted=false] - boolean property
+ *@module InputEventPollyfill
+ *@memberof EventPollyfills
 */
 import { createDOMEvent } from '../../Globals.js';
 
@@ -23,6 +19,8 @@ export default {
         }
 
         /**
+         *@constructor
+         *@memberof EventPollyfills.InputEventPollyfill#
          *@param {string} type - the event type
          *@param {InputEventInit} eventInit - the event init object
         */
@@ -35,6 +33,11 @@ export default {
             let event = createDOMEvent('Event', type, eventInit, ['bubbles', 'cancelable']);
 
             Object.defineProperties(event, {
+                /**
+                 *@memberof EventPollyfills.InputEventPollyfill#
+                 *@private
+                 *@type {string}
+                */
                 [Symbol.toStringTag]: {
                     get() {
                         return 'InputEvent';
@@ -42,6 +45,8 @@ export default {
                 },
 
                 /**
+                 * event data
+                 *@memberof EventPollyfills.InputEventPollyfill#
                  *@type {string}
                 */
                 data: {
@@ -51,6 +56,8 @@ export default {
                 },
 
                 /**
+                 * boolean indicating if event occured as part of a composition event
+                 *@memberof EventPollyfills.InputEventPollyfill#
                  *@type {boolean}
                 */
                 isComposing: {

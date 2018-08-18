@@ -1,5 +1,6 @@
 /**
- *@namespace XhrComponents
+ *@module Transport
+ *@memberof XhrComponents
 */
 import {host, onInstall} from '../Globals.js';
 
@@ -62,13 +63,11 @@ let ieString = '',
 
 onInstall(createTransport);
 
-/**
- *@memberof XhrComponents
-*/
 export default {
 
     /**
      * boolean value indicating if xhr transport can be created
+     *@memberof XhrComponents.Transport
      *@type {boolean}
     */
     get supported() {
@@ -78,7 +77,7 @@ export default {
     /**
      * string value that contains the MSXML version string used in creating
      * the activeXObject, assuming transport was created using this medium
-     *
+     *@memberof XhrComponents.Transport
      *@type {boolean}
     */
     get ieString() {
@@ -87,7 +86,7 @@ export default {
 
     /**
      * creates and returns an xml http request
-     *
+     *@memberof XhrComponents.Transport
      *@returns {XMLHttpRequest|ActiveXObject}
      *@throws {Error} throws error if not supported
     */

@@ -1,26 +1,29 @@
 /**
- *@namespace EventDrivers
+ *@module CustomDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} CustomEventInit
- *@property {boolean} [CustomEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [CustomEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {mixed} [CustomEventInit.detail=null] - the custom event detail
+ *@property {mixed} [detail=null] - the custom event detail
 */
 import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
 
 /**
  * custom event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.CustomDriver#
  *@see {@link https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent| Mozilla Developers Network}
 */
 export default class CustomDriver extends Driver {
     /**
      * event types in the custom event interface
+     *@memberof EventDrivers.CustomDriver
      *@type {Array}
     */
     static get events() {
@@ -29,6 +32,7 @@ export default class CustomDriver extends Driver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.CustomDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -40,6 +44,7 @@ export default class CustomDriver extends Driver {
 
     /**
      * initializes the event according to the CustomEvent interface eventInit requirement
+     *@memberof EventDrivers.CustomDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {CustomEventInit} getFrom - event initialization objects
      *@param {mixed} [detail=null] - the custom event data
@@ -53,6 +58,7 @@ export default class CustomDriver extends Driver {
 
     /**
      * creates a CustomEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.CustomDriver
      *@param {string} type - the event type
      *@param {CustomEventInit} eventInit - event initialization object
      *@param {mixed} [detail=null] - the custom event data
@@ -72,6 +78,8 @@ export default class CustomDriver extends Driver {
     }
 
     /**
+     *@memberof EventDrivers.CustomDriver#
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {
@@ -80,6 +88,7 @@ export default class CustomDriver extends Driver {
 
     /**
      * Returns any custom data event was created with. Typically used for synthetic events.
+     *@memberof EventDrivers.CustomDriver#
      *@returns {*}
     */
     get detail() {

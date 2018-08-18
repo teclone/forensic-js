@@ -1,14 +1,16 @@
 /**
- *@namespace EventDrivers
+ *@module PopStateDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} PopStateEventInit
- *@property {boolean} [PopStateEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [PopStateEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {*} [PopStateEventInit.state=null] - the document state as passed in by
+ *@property {*} [state=null] - the document state as passed in by
  * pushState or replaceState
 */
 import {createDOMEvent} from '../../Globals.js';
@@ -16,12 +18,13 @@ import Driver from './Driver.js';
 
 /**
  * popstate event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.PopStateDriver#
  *@see {@link https://html.spec.whatwg.org/multipage/browsing-the-web.html#popstateevent| W3.org}
 */
 export default class PopStateDriver extends Driver {
     /**
      * event types in the popstate event interface
+     *@memberof EventDrivers.PopStateDriver
      *@type {Array}
     */
     static get events() {
@@ -30,6 +33,7 @@ export default class PopStateDriver extends Driver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.PopStateDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -41,6 +45,7 @@ export default class PopStateDriver extends Driver {
 
     /**
      * initializes the event according to the PopStateEvent interface eventInit requirement
+     *@memberof EventDrivers.PopStateDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {PopStateEventInit} getFrom - event initialization objects
      *@returns {Object}
@@ -55,6 +60,7 @@ export default class PopStateDriver extends Driver {
 
     /**
      * creates a PopStateEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.PopStateDriver
      *@param {string} type - the event type
      *@param {PopStateEventInit} eventInit - event initialization object
      *@returns {PopStateEvent}
@@ -73,6 +79,8 @@ export default class PopStateDriver extends Driver {
     }
 
     /**
+     *@memberof EventDrivers.PopStateDriver#
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {
@@ -81,6 +89,7 @@ export default class PopStateDriver extends Driver {
 
     /**
      * the event state
+     *@memberof EventDrivers.PopStateDriver#
      *@type {*}
     */
     get state() {

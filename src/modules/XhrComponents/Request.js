@@ -1,11 +1,13 @@
 /**
- *@namespace XhrComponents
+ *@module Request
+ *@memberof XhrComponents
 */
 import Util from '../Util.js';
 import { host } from '../Globals.js';
 
 /**
  * processes progress event
+ *@private
  *@param {Event} e - the progress event object
 */
 function processProgressEvent(e) {
@@ -16,6 +18,7 @@ function processProgressEvent(e) {
 
 /**
  * processes timeout events
+ *@private
 */
 function onTimeout() {
     this.timedOut = true;
@@ -24,6 +27,7 @@ function onTimeout() {
 
 /**
  * processes load events
+ *@private
 */
 function onAbort() {
     this.aborted = true;
@@ -32,6 +36,7 @@ function onAbort() {
 
 /**
  * processes load events
+ *@private
 */
 function onLoad() {
     this._resolve(this);
@@ -39,6 +44,7 @@ function onLoad() {
 
 /**
  * sets request headers
+ *@private
 */
 function setRequestHeaders() {
     for (let [name, value] of Object.entries(this.headers))
@@ -49,6 +55,7 @@ function setRequestHeaders() {
 
 /**
  * sends the request
+ *@private
 */
 function send() {
 
@@ -123,13 +130,11 @@ function send() {
     this.transport.send(data);
 }
 
-/**
- *@memberof XhrComponents
-*/
 export default class {
 
     /**
      * creates a request object
+     *@memberof XhrComponents.Request#
      *@param {string} url - the resource url
      *@param {Object} options - optional request configuration object
      *@param {string} [options.method] - http method verb to use
@@ -144,7 +149,6 @@ export default class {
      *@param {number} [options.timeout] - time in milliseconds to abort request
      *@param {number} [options.priority] - request priority level. priority is higher in descending order
      *@param {Function} [options.progress] - request onprogress event callback handler
-     *@param {string} [overrideMethod] - http method verb to use, overrides options method value
     */
     constructor(url, options, resolve, reject, transport) {
         this.method = typeof options.method === 'string'? options.method.toUpperCase() : 'GET';
@@ -190,6 +194,8 @@ export default class {
 
     /**
      * return object identity
+     *@memberof XhrComponents.Request#
+     *@private
     */
     get [Symbol.toStringTag]() {
         return 'Request';
@@ -197,6 +203,7 @@ export default class {
 
     /**
      * sends the request
+     *@memberof XhrComponents.Request#
      *@returns {Promise}
     */
     send() {
@@ -208,6 +215,7 @@ export default class {
 
     /**
      * aborts the request
+     *@memberof XhrComponents.Request#
     */
     abort() {
         this.transport.abort();
@@ -215,6 +223,7 @@ export default class {
 
     /**
      * returns the request state
+     *@memberof XhrComponents.Request#
      *@type {string}
     */
     get state() {

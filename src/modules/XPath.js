@@ -1,7 +1,14 @@
+/**
+ *@module XPath
+*/
 import { onInstall, host, install, uninstall } from './Globals.js';
 import Util from './Util.js';
 import XML from './XML.js';
 
+/**
+ *@name xPathStates
+ *@private
+*/
 let xPathStates = {
         /**
          * boolean value indicating if xPath is supported
@@ -17,7 +24,7 @@ let xPathStates = {
     /**
      * resolves namespace specific to ActiveXObject implementation only and returns the
      * resolved namespace or empty string
-     *
+     *@private
      *@param {Object} [namespaces] - the namespace object
      *@returns {string}
     */
@@ -33,6 +40,7 @@ let xPathStates = {
 
     /**
      * returns a dom implementation namesapace resolver for the given namespace.
+     *@private
      *@param {Object} [namespaces] - the namespace object
      *@returns {Function|null}
     */
@@ -51,6 +59,7 @@ let xPathStates = {
 
     /**
      * validates the selector and node
+     *@private
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
      *@returns {Array}
@@ -83,6 +92,7 @@ let xPathStates = {
 
     /**
      * selects and returns the first matching node
+     *@private
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
      *@param {string|Function|null} namespaceResolver - the resolved namespace in the
@@ -102,6 +112,7 @@ let xPathStates = {
 
     /**
      * selects and returns the first matching node
+     *@private
      *@param {string} selector - the xPath selector
      *@param {Document|Element} node - the context node
      *@param {string|Function|null} namespaceResolver - the resolved namespace in the
@@ -131,6 +142,7 @@ let xPathStates = {
 
     /**
      * initialize the module
+     *@private
     */
     init = function () {
         let xml = new XML();

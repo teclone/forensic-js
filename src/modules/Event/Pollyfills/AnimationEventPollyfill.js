@@ -1,11 +1,10 @@
 /**
- * event initialization options.
- *@typedef {Object} AnimationEventInit
- *@property {boolean} [AnimationEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [AnimationEventInit.cancelable=false] - boolean value indicating if event is cancelable
- *@property {string} [AnimationEventInit.animationName=''] - animation name
- *@property {float} [AnimationEventInit.elapsedTime=0.0] - animation elapsed time
- *@property {string} [AnimationEventInit.pseudoElement=''] - animation pseudo element
+ *@namespace EventPollyfills
+*/
+
+/**
+ *@module AnimationEventPollyfill
+ *@memberof EventPollyfills
 */
 import { createDOMEvent } from '../../Globals.js';
 
@@ -24,6 +23,8 @@ export default {
         }
 
         /**
+         *@constructor
+         *@memberof EventPollyfills.AnimationEventPollyfill#
          *@param {string} type - the event type
          *@param {AnimationEventInit} eventInit - the event init object
         */
@@ -36,6 +37,11 @@ export default {
             let event = createDOMEvent('Event', type, eventInit, ['bubbles', 'cancelable']);
 
             Object.defineProperties(event, {
+                /**
+                 *@memberof EventPollyfills.AnimationEventPollyfill#
+                 *@private
+                 *@type {string}
+                */
                 [Symbol.toStringTag]: {
                     get() {
                         return 'AnimationEvent';
@@ -43,6 +49,8 @@ export default {
                 },
 
                 /**
+                 * animation name
+                 *@memberof EventPollyfills.AnimationEventPollyfill#
                  *@type {string}
                 */
                 animationName: {
@@ -52,6 +60,8 @@ export default {
                 },
 
                 /**
+                 * animation pseudo element
+                 *@memberof EventPollyfills.AnimationEventPollyfill#
                  *@type {string}
                 */
                 pseudoElement: {
@@ -61,6 +71,8 @@ export default {
                 },
 
                 /**
+                 * animation elapsed time in milliseconds
+                 *@memberof EventPollyfills.AnimationEventPollyfill#
                  *@type {number}
                 */
                 elapsedTime: {

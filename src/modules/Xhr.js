@@ -1,5 +1,5 @@
 /**
- * the xhr module performs request related tasks, manages request queues, progress watch,
+ * the Xhr module performs request related tasks, manages request queues, progress watch,
  * request headers and lots more
  *@module Xhr
 */
@@ -94,8 +94,8 @@ let xhrStates = {
     },
 
     /**
-     *@private
      * promotes the priority of each pending request that have lasted for ageLimit
+     *@private
     */
     promote = function () {
         var pendingRequests = xhrStates.pendingRequests;
@@ -110,8 +110,8 @@ let xhrStates = {
     },
 
     /**
-     *@private
      * manages the polling process.
+     *@private
     */
     manage = function() {
         clearTimeout(xhrStates.iterationId);
@@ -127,8 +127,8 @@ let xhrStates = {
     },
 
     /**
-     *@private
      * starts the polling processing.
+     *@private
     */
     start = function() {
         if (xhrStates.started)
@@ -140,6 +140,7 @@ let xhrStates = {
 
     /**
      * asynchronously execute a http request on the given url using a given http method verb.
+     *@private
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -186,9 +187,7 @@ export default {
     },
 
     /**
-     * sets default request timeout or retrieves the default timeout value
-     * the default timeout value is 15 seconds which is 15000 ms
-     *@memberof Xhr
+     * sets default request timeout or retrieves the default timeout value. Default is 15000 ms
      *@param {number} [ms] - time in milliseconds after which to timeout request
      *@returns {*}
     */
@@ -201,9 +200,7 @@ export default {
     },
 
     /**
-     * sets the polling time or retrieves the poll time value.
-     * The default value is 250ms
-     *@memberof Xhr
+     * sets the polling time or retrieves the poll time value. The default value is 250ms
      *@param {number} [ms] - time in milliseconds after which to poll requests repeatedly
      *@returns {*}
     */
@@ -217,9 +214,7 @@ export default {
 
     /**
      * sets time after which a pending request priority is promoted one value up or returns
-     * the value if called with no ms argument.
-     * The default value is 3000ms
-     *@memberof Xhr
+     * the value if called with no ms argument. default value is 3000ms
      *@param {number} ms - time in milliseconds after which to promote a request's priority
      *@returns {*}
     */
@@ -233,8 +228,6 @@ export default {
 
     /**
      * indicates if xml http request is supported
-     *
-     *@memberof Xhr
      *@type {boolean}
     */
     get supported() {
@@ -244,8 +237,6 @@ export default {
     /**
      * contains the  ActiveXObject MSXML version string used in creating xhr transport.
      * Its value will be empty if created through the XMLHttpRequest construct
-     *
-     *@memberof Xhr
      *@type {string}
     */
     get ieString() {
@@ -254,8 +245,6 @@ export default {
 
     /**
      * adds a http header to the global header object.
-     *
-     *@memberof Xhr
      *@param {string} name - the header name
      *@param {*} value - the header value
      *@returns {this}
@@ -268,8 +257,6 @@ export default {
 
     /**
      * adds http headers to the global header object.
-     *
-     *@memberof Xhr
      *@param {Object} entries - the header entries
      *@returns {this}
     */
@@ -281,8 +268,6 @@ export default {
 
     /**
      * removes http header from the global header object.
-     *
-     *@memberof Xhr
      *@param {string} headerName - global header to remove
      *@returns {this}
     */
@@ -294,8 +279,6 @@ export default {
 
     /**
      * removes comma separated list of headers from the global header object.
-     *
-     *@memberof Xhr
      *@param {...string} headerNames - comma separated list of headers to remove
      *@returns {this}
     */
@@ -308,8 +291,6 @@ export default {
 
     /**
      * asynchronously execute a http request on the given url using a given http method verb.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -320,8 +301,6 @@ export default {
 
     /**
      * get data asynchronously from given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -332,8 +311,6 @@ export default {
 
     /**
      * post data asynchronously to the given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -344,8 +321,6 @@ export default {
 
     /**
      * put data asynchronously on the given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -356,8 +331,6 @@ export default {
 
     /**
      * delete data asynchronously on the given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -368,8 +341,6 @@ export default {
 
     /**
      * retrieve a resource meta headers from the given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}
@@ -380,8 +351,6 @@ export default {
 
     /**
      * retrieve resource permitted http communications method verbs from the given url.
-     *
-     *@memberof Xhr
      *@param {string} url - the resource url
      *@param {Object} [options] - optional request configuration object
      *@returns {Promise}

@@ -1,27 +1,30 @@
 /**
- *@namespace EventDrivers
+ *@module HashChangeDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} HashChangeEventInit
- *@property {boolean} [HashChangeEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [HashChangeEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {string} [HashChangeEventInit.oldURL=''] - represent the old url
- *@property {string} [HashChangeEventInit.newURL=''] - represent the new url
+ *@property {string} [oldURL=''] - represent the old url
+ *@property {string} [newURL=''] - represent the new url
 */
 import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
 
 /**
  * hashchange event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.HashChangeDriver#
  *@see {@link https://html.spec.whatwg.org/multipage/browsing-the-web.html#hashchangeevent| W3.org}
 */
 export default class HashChangeDriver extends Driver {
     /**
      * event types in the hashchange event interface
+     *@memberof EventDrivers.HashChangeDriver
      *@type {Array}
     */
     static get events() {
@@ -30,6 +33,7 @@ export default class HashChangeDriver extends Driver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.HashChangeDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -41,6 +45,7 @@ export default class HashChangeDriver extends Driver {
 
     /**
      * initializes the event according to the HashChangeEvent interface eventInit requirement
+     *@memberof EventDrivers.HashChangeDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {HashChangeEventInit} getFrom - event initialization objects
      *@returns {Object}
@@ -56,6 +61,7 @@ export default class HashChangeDriver extends Driver {
 
     /**
      * creates a HashChangeEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.HashChangeDriver
      *@param {string} type - the event type
      *@param {HashChangeEventInit} eventInit - event initialization object
      *@returns {HashChangeEvent}
@@ -74,6 +80,8 @@ export default class HashChangeDriver extends Driver {
     }
 
     /**
+     *@memberof EventDrivers.HashChangeDriver#
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {
@@ -82,6 +90,7 @@ export default class HashChangeDriver extends Driver {
 
     /**
      * the old Url value
+     *@memberof EventDrivers.HashChangeDriver#
      *@type {string}
     */
     get oldURL() {
@@ -90,6 +99,7 @@ export default class HashChangeDriver extends Driver {
 
     /**
      * the new Url value
+     *@memberof EventDrivers.HashChangeDriver#
      *@type {string}
     */
     get newURL() {

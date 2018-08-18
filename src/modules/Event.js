@@ -1,3 +1,6 @@
+/**
+ *@module Event
+*/
 import { install, uninstall, host, root, onInstall, browserPrefixes } from './Globals.js';
 import Util from './Util.js';
 import Queue from './Queue.js';
@@ -19,28 +22,28 @@ import InputDriver from './Event/Drivers/InputDriver.js';
 
 /**
  *@typedef {Object} BindEventOptions
- *@property {boolean} [BindEventOptions.passive=false] - boolean value indicating if listener
+ *@property {boolean} [passive=false] - boolean value indicating if listener
  * should be bound in passive or non passive mode. defaults to false
- *@property {boolean} [BindEventOptions.capture=false] - boolean value indicating if listener should be
+ *@property {boolean} [capture=false] - boolean value indicating if listener should be
  * bound to the capturing phase. defaults to false
- *@property {boolean} [BindEventOptions.runLast=false] - boolean value indicating if listener should
+ *@property {boolean} [runLast=false] - boolean value indicating if listener should
  * be executed last. defaults to false
- *@property {boolean} [BindEventOptions.runFirst=false] - boolean value indicating if listener should
+ *@property {boolean} [runFirst=false] - boolean value indicating if listener should
  * be executed first. defaults to false
- *@property {boolean} [BindEventOptions.runOnce=false] - boolean value indicating if listener should
+ *@property {boolean} [runOnce=false] - boolean value indicating if listener should
  * run only once. defaults to false
- *@property {number} [BindEventOptions.priority=5] - integer value indicating listener execution
+ *@property {number} [priority=5] - integer value indicating listener execution
  * priority level. defaults to 5
- *@property {boolean} [BindEventOptions.acceptBubbledEvents=true] - set to false if you only want the
+ *@property {boolean} [acceptBubbledEvents=true] - set to false if you only want the
  * listener callback to be executed when the event origin is the target given. Bubbled
  * events will not trigger execution if set to false.
 */
 
 /**
  *@typedef {Object} UnbindEventOptions
- *@property {boolean} [UnbindEventOptions.bindPassive=false] - boolean value indicating if listener
+ *@property {boolean} [bindPassive=false] - boolean value indicating if listener
  * was bound in passive or non passive mode. defaults to false
- *@property {boolean} [UnbindEventOptions.capture=false] - boolean value indicating if listener was
+ *@property {boolean} [capture=false] - boolean value indicating if listener was
  * bound to the capturing phase. defaults to false
 */
 
@@ -131,8 +134,9 @@ const EVENT_DRIVERS = [
 ];
 
 let
-    /*
+    /**
      *event driver classes
+     *@private
     */
     driverClasses = {
         Driver, CustomDriver, TransitionDriver, AnimationDriver, UIDriver, FocusDriver,
@@ -142,6 +146,7 @@ let
 
     /**
      * sorting function for event listeners
+     *@private
      *@param {Object} listener1 - the first listener object item
      *@param {Object} listener2 - the second listener object item
     */
@@ -174,6 +179,7 @@ let
 
     /**
      * holds all states for the event module
+     *@private
     */
     eventStates = {
         /**
@@ -263,6 +269,7 @@ let
 
     /**
      * constructs an event configuration object
+     *@private
      *@param {Object} config - the event config
      *@param {boolean} deep - boolean value indicating if the construct should be deep, if it should
      * include runOnce, capture and acceptBubbledEvents, bindPassive
@@ -289,6 +296,7 @@ let
 
     /**
      * constructs an event driver for the given event
+     *@private
      *@param {Event} event - the event object
      *@return {Object}
     */
@@ -330,6 +338,7 @@ let
 
     /**
      * aliases the event type to the real event that is supported by the browser
+     *@private
      *@param {string} type - event type to aliase
      *@returns {string}
     */
@@ -393,7 +402,7 @@ let
 
     /**
      * checks if the event listener unbind process should proceed.
-     *
+     *@private
      *@param {string} type - the event type
      *@param {Function} callback - the event listener callback function
      *@param {EventTarget} target - the event target
@@ -518,6 +527,7 @@ let
 
     /**
      * throttles events
+     *@private
      *@param {string} type - the event type to throttle
      *@param {number} timestamp - the event timestamp
      *@return {boolean}
@@ -628,6 +638,7 @@ let
 
     /**
      * passive event listener router, routes the event to its listeners
+     *@private
      *@param {Object} e - the event object
     */
     passiveEventListenerRouter = function(e) {
@@ -641,6 +652,7 @@ let
 
     /**
      * event listener router, routes the event to its listeners
+     *@private
      *@param {Object} e - the event object
     */
     eventListenerRouter = function(e) {
@@ -654,7 +666,7 @@ let
 
     /**
      * binds event router for the given event type
-     *
+     *@private
      *@param {string} type - the event type
      *@param {Object} config - the event configuration options
      *@param {boolean} config.passive - boolean value indicating if the listener is a passive listener
@@ -680,7 +692,7 @@ let
 
     /**
      * unbinds event router for the given event type
-     *
+     *@private
      *@param {string} type - the event type
      *@param {Object} config - the event configuration options
      *@param {boolean} config.passive - boolean value indicating if the listener is a passive listener
@@ -704,6 +716,7 @@ let
 
     /**
      * executes all bound ready event listeners once the DOMContentLoaded event is fired
+     *@private
      *@param {Object} e - the event object
     */
     executeReadyEventListeners = function(e) {
@@ -717,6 +730,7 @@ let
 
     /**
      * initializes the event module
+     *@private
     */
     init = function() {
         //test for passive event listener support
@@ -745,7 +759,7 @@ let eventModule = {
     /**
      * calls the Globals install method with the parameters. This is useful when using the
      * Utils module as a standalone distribution or lib.
-     *
+     *@memberof Event
      *@param {Object} hostParam - the host object, the global this object in a given usage
      * environment
      *@param {Object} rootParam - the root object. an example is the document object
@@ -758,7 +772,7 @@ let eventModule = {
     /**
      * calls the Globals uninstall method with the parameters. This is useful when using the
      * Utils module as a standalone distribution or lib.
-     *
+     *@memberof Event
      *@returns {boolean}
     */
     uninstall() {
@@ -767,6 +781,7 @@ let eventModule = {
 
     /**
      * sets or retrieves the silence event status
+     *@memberof Event
      *@type {boolean}
     */
     get silenceEvents() {
@@ -782,6 +797,7 @@ let eventModule = {
 
     /**
      * sets or retrieves scroll event throttle interval in milliseconds
+     *@memberof Event
      *@type {number}
     */
     get scrollEventThrottleInterval() {
@@ -798,6 +814,7 @@ let eventModule = {
 
     /**
      * sets or retrieves resize event throttle interval in milliseconds
+     *@memberof Event
      *@type {number}
     */
     get resizeEventThrottleInterval() {
@@ -814,7 +831,7 @@ let eventModule = {
 
     /**
      * registers ready event listener.
-     *
+     *@memberof Event
      *@param {Function} callback - the callback function
      *@param {Object} [config] - optional configuration object
      *@param {boolean} [config.runLast=false] - boolean value indicating if this listener
@@ -823,7 +840,7 @@ let eventModule = {
      * should be executed first
      *@param {number} [config.priority=5] - integer value indicating listener execution
      * priority level. defaults to 5
-     *@param {Object} [scope=host] - scope execution object, defaults the event object
+     *@param {Object} [scope] - scope execution object, defaults the event object
      *@param {...*} [parameters] - comma separated list of parameters to pass to listener
      * during execution
      *@throws {TypeError} if listener is not a function.
@@ -841,6 +858,7 @@ let eventModule = {
 
     /**
      * binds event listener for a specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
@@ -870,6 +888,7 @@ let eventModule = {
 
     /**
      * binds event listener for a specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
@@ -885,6 +904,7 @@ let eventModule = {
 
     /**
      * binds run once event listener for a specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
@@ -905,6 +925,7 @@ let eventModule = {
 
     /**
      * unbinds event listener for specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
@@ -932,6 +953,7 @@ let eventModule = {
 
     /**
      * unbinds event listener for specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
      *@param {EventTarget} target - event target object
@@ -945,6 +967,7 @@ let eventModule = {
 
     /**
      * unbinds all event listeners for specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {EventTarget} target - event target object
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
@@ -968,6 +991,7 @@ let eventModule = {
 
     /**
      * unbinds all event listeners for specified event type(s) on a given event target.
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {EventTarget} target - event target object
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
@@ -980,7 +1004,7 @@ let eventModule = {
 
     /**
      * dispatches specified event type(s) on the given event target.
-     *
+     *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {EventTarget} target - event target object
      *@param {Object} [eventInit] - optional event initialization object
@@ -1008,6 +1032,7 @@ let
 
     /**
      * cleans up event testers
+     *@private
      *@this {EventTarget}
     */
     cleanupEventTesters = function(details, remove, style) {
