@@ -2,7 +2,7 @@
   "name": "forensic-js",
   "version": "0.0.0-development",
   "description": "a modular javascript that offers excellent event management, application state management, fetch api, and lots more",
-  "main": "index.js",
+  "main": "lib/exports.js",
   "scripts": {
     "commit": "git-cz",
     "lint-src": "eslint ./src/** --fix",
