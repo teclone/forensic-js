@@ -3,6 +3,7 @@
     "mainModuleFileName": "exports.js",
     "sourcemap": false,
     "distConfig": {
+        "uglify": true,
         "exclude": [
             "src/modules/Event/*",
             "src/modules/XhrComponents/*"
