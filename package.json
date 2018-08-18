@@ -1,7 +1,7 @@
 {
   "name": "forensic-js",
   "version": "0.0.0-development",
-  "description": "ForensicJS is a collection of tested JavaScript modules that performs different kinds of web development tasks",
+  "description": "A collection of tested JavaScript modules that performs different kinds of web development tasks",
   "main": "lib/exports.js",
   "scripts": {
     "commit": "git-cz",
