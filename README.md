@@ -1015,3 +1015,9 @@ XPath.selectNode('st:students/st:student/st:name', xmlDoc, namespaces);
 //run selection from the documentElement context
 XPath.selectNodes('st:students/st:student/st:name', xmlDoc.documentElement, namespaces);
 ```
+
+## About Project Maintainers
+
+This project is maintained by [harrison ifeanyichukwu](mailto:harrisonifeanyichukwu@gmail.com), a young, passionate full stack web developer, an [MDN](https://developer.mozilla.org/en-US/profiles/harrison-ifeanyichukwu) documentator, maintainer of w3c [xml-serializer](https://www.npmjs.com/package/@harrison-ifeanyichukwu/xml-serializer) project, node.js [R-Server](https://github.com/harrison-ifeanyichukwu/r-server), [Rollup-all](https://www.npmjs.com/package/rollup-all) one-time [Rollup.js](https://rollupjs.org/guide/en) build tool and other amazing projects.
+
+He is available for hire, ready to work on amazing `PHP`,  `Node.js`,  `React`,  `Angular`,  `HTML5`,  `CSS`. Looks forward to hearing from you soon!!!
