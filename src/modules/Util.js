@@ -68,7 +68,7 @@ export default {
     /**
      * tests an objects toStringTag identity name
      *@param {Object} objectArg - object to test
-     *@param {String} name - object expected name
+     *@param {string} name - object expected name
     */
     objectIsA(objectArg, name) {
         return this.isObject(objectArg) && toString.call(objectArg) === `[object ${name}]`;
@@ -375,6 +375,7 @@ export default {
     mergeObjects(...objects) {
         /**
          * runs the process
+         *@private
          *@param {Object} dest - the destination object
          *@param {Object} src - the src object
          *@returns {Object}

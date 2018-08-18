@@ -1,9 +1,13 @@
+/**
+ *@module XML
+*/
 import { onInstall, host, root, install, uninstall} from './Globals.js';
 import Util from './Util.js';
 import Xhr from './Xhr.js';
 
 /**
- * module internal state
+ *@name xmlStates
+ *@private
 */
 let xmlStates = {
 
@@ -30,6 +34,7 @@ let xmlStates = {
 
     /**
      * handles internet explorer readystate change event
+     *@private
      *@this {XMLDocument}
      *@param {Event} e - the ready state change event object
      *@param {Callable} resolve - promise resolve callback
@@ -47,6 +52,7 @@ let xmlStates = {
 
     /**
      * creates xml document through internet explorer active x object construct
+     *@private
      *@param {string} [prolog] - xml prolog as well as optional root element
      *@param {DocumentType} [documentType=null] - new document documentType node. defaults to null.
      *@returns {XMLDocument}
@@ -135,6 +141,7 @@ let xmlStates = {
     },
 
     /**
+     *@private
      *@returns {string}
     */
     text = function() {
@@ -156,8 +163,9 @@ let xmlStates = {
 
     /**
      * parses the xml string argument into the this document.
+     *@private
      *@this {XMLDocument}
-     *@param {String} xmlString - xml string
+     *@param {string} xmlString - xml string
     */
     parseXML = function(xmlString) {
         let parsedXML = xmlStates.parser.parseFromString(xmlString, 'text/xml');
@@ -220,6 +228,7 @@ let xmlStates = {
 
 /**
  * sets up the xml module
+ *@private
 */
 let init = function() {
 
@@ -231,20 +240,24 @@ let init = function() {
     xmlStates.serializer = new host.XMLSerializer();
 
     let xml = createDocument(),
-        xmlDocumentInterface = null;
+        /**
+         *@name XMLDocument
+        */
+        XMLDocument = null;
 
     /* istanbul ignore if */
     if (Util.objectIsA(xml, 'XMLDocument'))
-        xmlDocumentInterface = host.XMLDocument;
+        XMLDocument = host.XMLDocument;
     else
-        xmlDocumentInterface = host.Document;
+        XMLDocument = host.Document;
 
     /**
      * override the load method
+     *@memberof XMLDocument#
      *@param {string} url - xml resource url
      *@returns {Promise}
     */
-    xmlDocumentInterface.prototype.load = function(url) {
+    XMLDocument.prototype.load = function(url) {
         let xmlDoc = this;
         return new Promise((resolve, reject) => {
 
@@ -266,20 +279,21 @@ let init = function() {
 
     /**
      * define a loadXML method
+     *@memberof XMLDocument#
      *@param {string} xmlString - the xml string
     */
-    xmlDocumentInterface.prototype.loadXML = function(xmlString) {
+    XMLDocument.prototype.loadXML = function(xmlString) {
         parseXML.call(this, xmlString);
     };
 
-    /**define xml getter property on node prototype*/
+    /*define xml getter property on node prototype*/
     Object.defineProperty(host.Node.prototype, 'xml', {
         get() {
             return xmlStates.serializer.serializeToString(this);
         }
     });
 
-    /**define text property on node prototype */
+    /*define text property on node prototype */
     Object.defineProperty(host.Node.prototype, 'text', {
         get() {
             return text.call(this);
@@ -334,7 +348,7 @@ export default class XML {
      *@param {string} [qualifiedName] - document root node qualified name
      *@param {Object} [namespaces] - object literal containing prefixName:namespaceURI pairs.
      * the default namespaceURI should be named 'default' or 'xmlns'.
-     *@param {DocumentType} [documentType=null] - a documentType node. defaults to null.
+     *@param {DocumentType} [documentType] - a documentType node. defaults to null.
     */
     constructor(qualifiedName, namespaces, documentType) {
         let stringNamespaces = '';
@@ -356,6 +370,7 @@ export default class XML {
 
     /**
      * returns object identity
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {

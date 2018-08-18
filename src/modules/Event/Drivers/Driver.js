@@ -3,10 +3,16 @@
 */
 
 /**
+ *@module Driver
+ *@memberof EventDrivers
+*/
+
+/**
  * event initialization options.
  *@typedef {Object} EventInit
- *@property {boolean} [EventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [EventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
 */
 import {createDOMEvent} from '../../Globals.js';
@@ -14,12 +20,13 @@ import Util from '../../Util.js';
 
 /**
  * base event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.Driver#
  *@see {@link https://developer.mozilla.org/en-US/docs/Web/API/Event| Mozilla Developers Network}
 */
 export default class Driver {
     /**
      * event types in the base Event interface
+     *@memberof EventDrivers.Driver
      *@type {Array}
     */
     static get events() {
@@ -38,6 +45,7 @@ export default class Driver {
 
     /**
      *@type {Array}
+     *@memberof EventDrivers.Driver
     */
     static get eventInitKeys() {
         return ['bubbles', 'cancelable'];
@@ -45,6 +53,7 @@ export default class Driver {
 
     /**
      * initializes the event according to the Event interface eventInit requirement
+     *@memberof EventDrivers.Driver
      *@param {Object} storeIn - object in which to store initializations
      *@param {EventInit} getFrom - event initialization objects
      *@returns {Object}
@@ -59,6 +68,7 @@ export default class Driver {
 
     /**
      * creates an Event object that can be dispatched to an event target
+     *@memberof EventDrivers.Driver
      *@param {string} type - the event type
      *@param {EventInit} eventInit - event initialization object
      *@returns {Event}
@@ -82,6 +92,8 @@ export default class Driver {
 
     /**
      *@type {string}
+     *@memberof EventDrivers.Driver#
+     *@private
     */
     get [Symbol.toStringTag]() {
         return 'Driver';
@@ -89,6 +101,7 @@ export default class Driver {
 
     /**
      * the event type
+     *@memberof EventDrivers.Driver#
      *@type {string}
     */
     get type() {
@@ -97,6 +110,7 @@ export default class Driver {
 
     /**
      * the event target
+     *@memberof EventDrivers.Driver#
      *@type {EventTarget}
     */
     get target() {
@@ -105,6 +119,7 @@ export default class Driver {
 
     /**
      * gets the current target whose event listener's callback is being invoked
+     *@memberof EventDrivers.Driver#
      *@type {EventTarget}
     */
     get currentTarget() {
@@ -113,8 +128,9 @@ export default class Driver {
 
     /**
      * sets the current target whose event listener's callback is being invoked.
-     *
+     *@memberof EventDrivers.Driver#
      *@param {EventTarget} target - the current event target
+     *@private
     */
     set currentTarget(target) {
         if (Util.isEventTarget(target))
@@ -123,6 +139,7 @@ export default class Driver {
 
     /**
      * returns boolean indicating if it is passive event
+     *@memberof EventDrivers.Driver#
      *@type {boolean}
     */
     get passive() {
@@ -131,7 +148,8 @@ export default class Driver {
 
     /**
      * sets boolean property indicating if it passive event.
-     *
+     *@memberof EventDrivers.Driver#
+     *@private
      *@param {boolean} status - the status
     */
     set passive(status) {
@@ -140,6 +158,7 @@ export default class Driver {
 
     /**
      * the event phase
+     *@memberof EventDrivers.Driver#
      *@type {number}
     */
     get phase() {
@@ -148,7 +167,8 @@ export default class Driver {
 
     /**
      * sets event phase
-     *
+     *@memberof EventDrivers.Driver#
+     *@private
      *@param {number} value - the event phase
      *@returns {boolean}
     */
@@ -167,6 +187,7 @@ export default class Driver {
 
     /**
      * boolean value indicating if event bubbles
+     *@memberof EventDrivers.Driver#
      *@type {boolean}
     */
     get bubbles() {
@@ -175,6 +196,7 @@ export default class Driver {
 
     /**
      * boolean value indicating if event was dispatched by the user agent, and false otherwise.
+     *@memberof EventDrivers.Driver#
      *@type {boolean}
     */
     get isTrusted() {
@@ -183,6 +205,7 @@ export default class Driver {
 
     /**
      * boolean value indicating if event default action has been prevented
+     *@memberof EventDrivers.Driver#
      *@type {boolean}
     */
     get defaultPrevented() {
@@ -191,6 +214,7 @@ export default class Driver {
 
     /**
      * boolean value indicating if event is still propagating
+     *@memberof EventDrivers.Driver#
      *@type {boolean}
     */
     get isPropagating() {
@@ -200,6 +224,7 @@ export default class Driver {
     /**
      * the creation time of event as the number of milliseconds that passed since
      * 00:00:00 UTC on 1 January 1970.
+     *@memberof EventDrivers.Driver#
      *@type {number}
     */
     get timestamp() {
@@ -208,6 +233,7 @@ export default class Driver {
 
     /**
      * stops the event from propagating.
+     *@memberof EventDrivers.Driver#
     */
     stopPropagation() {
         this.event.stopPropagation();
@@ -216,6 +242,7 @@ export default class Driver {
 
     /**
      * prevents the events default.
+     *@memberof EventDrivers.Driver#
     */
     preventDefault() {
         if (this.passive)

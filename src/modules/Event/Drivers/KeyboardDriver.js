@@ -1,26 +1,28 @@
 /**
- *@namespace EventDrivers
+ *@module KeyboardDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} KeyboardEventInit
- * see {@link https://www.w3.org/TR/uievents-code/} for list of keyboard code values
- * see {@link https://www.w3.org/TR/uievents-key/} for list of keyboard key values
+ *@private
+ *@see {@link https://www.w3.org/TR/uievents-code/} for list of keyboard code values
+ *@see {@link https://www.w3.org/TR/uievents-key/} for list of keyboard key values
  *
- *@property {boolean} [KeyboardEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [KeyboardEventInit.cancelable=false] - boolean value indicating if event is
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {WindowProxy} [KeyboardEventInit.view=null] - identifies the window from which the event was generated.
- *@property {number} [KeyboardEventInit.detail=0] - value is initialized to a number that is application-specific.
- *@property {boolean} [KeyboardEventInit.isComposing=false] - indicates if the event being
+ *@property {WindowProxy} [view=null] - identifies the window from which the event was generated.
+ *@property {number} [detail=0] - value is initialized to a number that is application-specific.
+ *@property {boolean} [isComposing=false] - indicates if the event being
  * constructed occurs as part of a composition sequence
- *@property {boolean} [KeyboardEventInit.repeat=false] - indicates if event occurs as part of
+ *@property {boolean} [repeat=false] - indicates if event occurs as part of
  * a repeating sequence of KeyboardEvent caused by long depression of a single key
- *@property {long} [KeyboardEventInit.location=0] - The location of the key in the board layout
- *@property {string} [KeyboardEventInit.key=''] - the final key value of the event. if it is not
+ *@property {long} [location=0] - The location of the key in the board layout
+ *@property {string} [key=''] - the final key value of the event. if it is not
  * a printable character, then it should be part of the UIEvent-keys as defined.
- *@property {string} [KeyboardEventInit.code=''] - the unicode character for the key pressed.
+ *@property {string} [code=''] - the unicode character for the key pressed.
  * value should be one of
 */
 import {createDOMEvent} from '../../Globals.js';
@@ -35,12 +37,13 @@ const MODIFIER_KEYS = {
 
 /**
  * keyboard event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.KeyboardDriver#
  *@see {@link https://www.w3.org/TR/uievents/#events-keyboardevents| W3C.org}
 */
 export default class KeyboardDriver extends UIDriver {
     /**
      * event types in the mouse event interface
+     *@memberof EventDrivers.KeyboardDriver
      *@type {Array}
     */
     static get events() {
@@ -51,6 +54,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.KeyboardDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -67,9 +71,9 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * initializes the event according to the Keyboard interface eventInit requirement
+     *@memberof EventDrivers.KeyboardDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {KeyboardEventInit} getFrom - event initialization objects
-     *@param {*} [detail=null] - custom event data
      *@returns {Object}
     */
     static initEvent(storeIn, getFrom) {
@@ -89,6 +93,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * creates a Keyboard event that can be dispatched to an event target
+     *@memberof EventDrivers.KeyboardDriver
      *@param {string} type - the event type
      *@param {KeyboardEventInit} eventInit - event initialization object
      *@returns {Keyboard}
@@ -108,6 +113,8 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      *@type {string}
+     *@memberof EventDrivers.KeyboardDriver#
+     *@private
     */
     get [Symbol.toStringTag]() {
         return 'KeyboardDriver';
@@ -115,6 +122,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * boolean value indicating the control key is activated by the event
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get ctrlKey() {
@@ -123,6 +131,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * boolean value indicating the shift key is activated by the event
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get shiftKey() {
@@ -131,6 +140,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * boolean value indicating the meta key is activated by the event
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get metaKey() {
@@ -139,6 +149,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * boolean value indicating the alternate key is activated by the event
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get altKey() {
@@ -148,6 +159,7 @@ export default class KeyboardDriver extends UIDriver {
     /**
      * key holds the key value of the key pressed, with considerations on the key modifier
      * states and keyboard layout/locale
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {string}
     */
     get key() {
@@ -158,6 +170,7 @@ export default class KeyboardDriver extends UIDriver {
      * code holds a string that identifies the physical key being pressed. The value is not
      * affected by the current keyboard layout or modifier state, so a particular key will
      * always return the same value.
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {string}
     */
     get code() {
@@ -167,6 +180,7 @@ export default class KeyboardDriver extends UIDriver {
     /**
      * true if the keyboard event occurs as part of a composition session, i.e., after a
      * compositionstart event and before the corresponding compositionend event
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get isComposing() {
@@ -175,6 +189,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * true if the keyboard event is repeating
+     *@memberof EventDrivers.KeyboardDriver#
      *@type {boolean}
     */
     get repeat() {
@@ -185,6 +200,7 @@ export default class KeyboardDriver extends UIDriver {
      * returns the key location in the keyboard. it is one of
      * DOM_KEY_LOCATION_STANDARD, DOM_KEY_LOCATION_LEFT, DOM_KEY_LOCATION_RIGHT
      * DOM_KEY_LOCATION_NUMPAD
+     *@memberof EventDrivers.KeyboardDriver#
      *@returns {Long}
     */
     get location() {
@@ -193,6 +209,7 @@ export default class KeyboardDriver extends UIDriver {
 
     /**
      * returns boolean value indicating if the passed in modifier key was active
+     *@memberof EventDrivers.KeyboardDriver#
      *@param {string} keyArg - the modifier key to check
      *@returns {boolean}
     */

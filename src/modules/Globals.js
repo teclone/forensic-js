@@ -141,6 +141,7 @@ export let uninstall = function() {
 /**
  * creates a dom event using either dom level 4 standard way or falls
  * back to dom level 3 way
+ *@memberof Globals
  *@param {string} eventInterface - the event interface constructor name
  *@param {string} type - the event type to create
  *@param {Object} eventInit - the event intialization object

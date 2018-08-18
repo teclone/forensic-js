@@ -1,39 +1,41 @@
 /**
- *@namespace EventDrivers
+ *@module WheelDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} WheelEventInit
- *@property {boolean} [WheelEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [WheelEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {WindowProxy} [WheelEventInit.view=null] - identifies the window from which the event was generated.
- *@property {number} [WheelEventInit.detail=0] - value is initialized to a number that is application-specific.
- *@property {long} [WheelEventInit.screenX=0] - initializes the X cordinate of the mouse in
+ *@property {WindowProxy} [view=null] - identifies the window from which the event was generated.
+ *@property {number} [detail=0] - value is initialized to a number that is application-specific.
+ *@property {long} [screenX=0] - initializes the X cordinate of the mouse in
  * relation to the device physical screen
- *@property {long} [WheelEventInit.screenY=0] - initializes the Y cordinate of the mouse in
+ *@property {long} [screenY=0] - initializes the Y cordinate of the mouse in
  * relation to the device physical screen
- *@property {long} [WheelEventInit.clientX=0] - initializes the X cordinate of the mouse in
+ *@property {long} [clientX=0] - initializes the X cordinate of the mouse in
  * relation to the browser viewport
- *@property {long} [WheelEventInit.clientY=0] - initializes the Y cordinate of the mouse in
+ *@property {long} [clientY=0] - initializes the Y cordinate of the mouse in
  * relation to the browser viewport
- *@property {boolean} [WheelEventInit.ctrlKey=false] - boolean indicating if the control key
+ *@property {boolean} [ctrlKey=false] - boolean indicating if the control key
  * was active during the event initiation
- *@property {boolean} [WheelEventInit.altKey=false] - boolean indicating if the alternate key
+ *@property {boolean} [altKey=false] - boolean indicating if the alternate key
  * was active during the event initiation
- *@property {boolean} [WheelEventInit.shiftKey=false] - boolean indicating if the shift key
+ *@property {boolean} [shiftKey=false] - boolean indicating if the shift key
  * was active during the event initiation
- *@property {boolean} [WheelEventInit.metaKey=false] - boolean indicating if the meta key
+ *@property {boolean} [metaKey=false] - boolean indicating if the meta key
  * was active during the event initiation
- *@property {short} [WheelEventInit.button=0] - initializes the button that was pressed. 0 represents
+ *@property {short} [button=0] - initializes the button that was pressed. 0 represents
  * left button, 1 is wheel button, 2 is right button
- *@property {EventTarget} [WheelEventInit.relatedTarget=null] - initializes the secondary EventTarget
+ *@property {EventTarget} [relatedTarget=null] - initializes the secondary EventTarget
  * related to a Focus event, depending on the type of event.
- *@property {double} [WheelEventInit.deltaX=0] - event delta cordinate in the X direction
- *@property {double} [WheelEventInit.deltaY=0] - event delta cordinate in the Y direction
- *@property {double} [WheelEventInit.deltaZ=0] - event delta cordinate in the Z direction
- *@property {long} [WheelEventInit.deltaMode=0] - deltaMode value
+ *@property {double} [deltaX=0] - event delta cordinate in the X direction
+ *@property {double} [deltaY=0] - event delta cordinate in the Y direction
+ *@property {double} [deltaZ=0] - event delta cordinate in the Z direction
+ *@property {long} [deltaMode=0] - deltaMode value
 */
 import {createDOMEvent} from '../../Globals.js';
 import MouseDriver from './MouseDriver.js';
@@ -41,12 +43,13 @@ import Util from '../../Util.js';
 
 /**
  * wheel event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.WheelDriver#
  *@see {@link https://www.w3.org/TR/uievents/#events-wheelevents| W3C.org}
 */
 export default class WheelDriver extends MouseDriver {
     /**
      * event types in the wheel event interface
+     *@memberof EventDrivers.WheelDriver
      *@type {Array}
     */
     static get events() {
@@ -57,6 +60,7 @@ export default class WheelDriver extends MouseDriver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.WheelDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -70,9 +74,9 @@ export default class WheelDriver extends MouseDriver {
 
     /**
      * initializes the event according to the WheelEvent interface eventInit requirement
+     *@memberof EventDrivers.WheelDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {WheelEventInit} getFrom - event initialization objects
-     *@param {*} [detail=null] - custom event data
      *@returns {Object}
     */
     static initEvent(storeIn, getFrom) {
@@ -89,6 +93,7 @@ export default class WheelDriver extends MouseDriver {
 
     /**
      * creates a WheelEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.WheelDriver
      *@param {string} type - the event type
      *@param {WheelEventInit} eventInit - event initialization object
      *@returns {WheelEvent}
@@ -108,6 +113,8 @@ export default class WheelDriver extends MouseDriver {
 
     /**
      *@type {string}
+     *@memberof EventDrivers.WheelDriver#
+     *@private
     */
     get [Symbol.toStringTag]() {
         return 'WheelDriver';
@@ -119,6 +126,7 @@ export default class WheelDriver extends MouseDriver {
      * in the case where the event is not cancelled. Otherwise,
      * this is an implementation-specific measurement (in pixels, lines, or pages) of the
      * movement of a wheel device around the x-axis.
+     *@memberof EventDrivers.WheelDriver#
      *@type {float}
     */
     get deltaX() {
@@ -131,6 +139,7 @@ export default class WheelDriver extends MouseDriver {
      * in the case where the event is not cancelled. Otherwise,
      * this is an implementation-specific measurement (in pixels, lines, or pages) of the
      * movement of a wheel device around the t-axis.
+     *@memberof EventDrivers.WheelDriver#
      *@type {float}
     */
     get deltaY() {
@@ -143,6 +152,7 @@ export default class WheelDriver extends MouseDriver {
      * in the case where the event is not cancelled. Otherwise,
      * this is an implementation-specific measurement (in pixels, lines, or pages) of the
      * movement of a wheel device around the z-axis.
+     *@memberof EventDrivers.WheelDriver#
      *@type {float}
     */
     get deltaZ() {
@@ -153,6 +163,7 @@ export default class WheelDriver extends MouseDriver {
      * The deltaMode attribute contains an indication of the units of measurement for the delta values.
      * The default value is DOM_DELTA_PIXEL (pixels). others are DOM_DELTA_LINE
      * and DOM_DELTA_PAGE
+     *@memberof EventDrivers.WheelDriver#
      *@type {long}
     */
     get deltaMode() {

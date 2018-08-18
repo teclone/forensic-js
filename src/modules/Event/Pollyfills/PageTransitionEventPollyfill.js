@@ -1,10 +1,6 @@
 /**
- * event initialization options.
- *@typedef {Object} PageTransitionEventInit
- *@property {boolean} [PageTransitionEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [PageTransitionEventInit.cancelable=false] - boolean value indicating if event is
- * cancelable
- *@property {boolean} [PageTransitionEventInit.persisted=false] - boolean property
+ *@module PageTransitionEventPollyfill
+ *@memberof EventPollyfills
 */
 import { createDOMEvent } from '../../Globals.js';
 
@@ -23,6 +19,8 @@ export default {
         }
 
         /**
+         *@constructor
+         *@memberof EventPollyfills.PageTransitionEventPollyfill#
          *@param {string} type - the event type
          *@param {PageTransitionEventInit} eventInit - the event init object
         */
@@ -35,6 +33,11 @@ export default {
             let event = createDOMEvent('Event', type, eventInit, ['bubbles', 'cancelable']);
 
             Object.defineProperties(event, {
+                /**
+                 *@memberof EventPollyfills.PageTransitionEventPollyfill#
+                 *@private
+                 *@type {string}
+                */
                 [Symbol.toStringTag]: {
                     get() {
                         return 'PageTransitionEvent';
@@ -42,6 +45,7 @@ export default {
                 },
 
                 /**
+                 *@memberof EventPollyfills.PageTransitionEventPollyfill#
                  *@type {boolean}
                 */
                 persisted: {

@@ -1,15 +1,17 @@
 /**
- *@namespace EventDrivers
+ *@module UIDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} UIEventInit
- *@property {boolean} [UIEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [UIEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {WindowProxy} [UIEventInit.view=null] - identifies the window from which the event was generated.
- *@property {number} [UIEventInit.detail=0] - value is initialized to a number that is application-specific.
+ *@property {WindowProxy} [view=null] - identifies the window from which the event was generated.
+ *@property {number} [detail=0] - value is initialized to a number that is application-specific.
 */
 import {createDOMEvent} from '../../Globals.js';
 import Driver from './Driver.js';
@@ -17,12 +19,13 @@ import Util from '../../Util.js';
 
 /**
  * ui event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.UIDriver#
  *@see {@link https://www.w3.org/TR/uievents/#events-uievents| W3C.org}
 */
 export default class UIDriver extends Driver {
     /**
      * event types in the ui event interface
+     *@memberof EventDrivers.UIDriver
      *@type {Array}
     */
     static get events() {
@@ -31,6 +34,7 @@ export default class UIDriver extends Driver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.UIDriver#
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -42,6 +46,7 @@ export default class UIDriver extends Driver {
 
     /**
      * initializes the event according to the UIEvent interface eventInit requirement
+     *@memberof EventDrivers.UIDriver#
      *@param {Object} storeIn - object in which to store initializations
      *@param {UIEventInit} getFrom - event initialization objects
      *@returns {Object}
@@ -57,6 +62,7 @@ export default class UIDriver extends Driver {
 
     /**
      * creates a UIEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.UIDriver#
      *@param {string} type - the event type
      *@param {UIEventInit} eventInit - event initialization object
      *@returns {UIEvent}
@@ -75,6 +81,8 @@ export default class UIDriver extends Driver {
     }
 
     /**
+     *@memberof EventDrivers.UIDriver#
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {
@@ -83,6 +91,7 @@ export default class UIDriver extends Driver {
 
     /**
      * a WindowProxy that contains the view that generated the event.
+     *@memberof EventDrivers.UIDriver#
      *@type {WindowProxy}
     */
     get view() {
@@ -91,6 +100,7 @@ export default class UIDriver extends Driver {
 
     /**
      * specifies some detail information about the Event, depending on the type of event.
+     *@memberof EventDrivers.UIDriver#
      *@type {number}
     */
     get detail() {

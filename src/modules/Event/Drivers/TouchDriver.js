@@ -1,18 +1,20 @@
 /**
- *@namespace EventDrivers
+ *@module TouchDriver
+ *@memberof EventDrivers
 */
 
 /**
  * event initialization options.
  *@typedef {Object} TouchEventInit
- *@property {boolean} [TouchEventInit.bubbles=true] - boolean value indicating if event bubbles
- *@property {boolean} [TouchEventInit.cancelable=false] - boolean value indicating if event is
+ *@private
+ *@property {boolean} [bubbles=true] - boolean value indicating if event bubbles
+ *@property {boolean} [cancelable=false] - boolean value indicating if event is
  * cancelable
- *@property {Array} [TouchEventInit.touches=[]] - array of touch points currently touching the
+ *@property {Array} [touches=[]] - array of touch points currently touching the
  * surface
- *@property {Array} [TouchEventInit.targetTouches=[]] - array of touch points currently touching
+ *@property {Array} [targetTouches=[]] - array of touch points currently touching
  * the target element
- *@property {Array} [TouchEventInit.changedTouches=[]] - array of touch points that has changed
+ *@property {Array} [changedTouches=[]] - array of touch points that has changed
  * since the last touch event
 */
 import {createDOMEvent} from '../../Globals.js';
@@ -21,12 +23,13 @@ import Util from '../../Util.js';
 
 /**
  * touch event event driver class
- *@memberof EventDrivers
+ *@memberof EventDrivers.TouchDriver#
  *@see {@link https://w3c.github.io/touch-events/#touch-interface| W3.org}
 */
 export default class TouchDriver extends UIDriver {
     /**
      * event types in the touch event event interface
+     *@memberof EventDrivers.TouchDriver
      *@type {Array}
     */
     static get events() {
@@ -35,6 +38,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * event init keys
+     *@memberof EventDrivers.TouchDriver
      *@type {Array}
     */
     static get eventInitKeys() {
@@ -46,6 +50,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * initializes the event according to the TouchEvent interface eventInit requirement
+     *@memberof EventDrivers.TouchDriver
      *@param {Object} storeIn - object in which to store initializations
      *@param {TouchEventInit} getFrom - event initialization objects
      *@returns {Object}
@@ -62,6 +67,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * creates a TouchEvent object that can be dispatched to an event target
+     *@memberof EventDrivers.TouchDriver
      *@param {string} type - the event type
      *@param {TouchEventInit} eventInit - event initialization object
      *@returns {TouchEvent}
@@ -80,6 +86,8 @@ export default class TouchDriver extends UIDriver {
     }
 
     /**
+     *@memberof EventDrivers.TouchDriver#
+     *@private
      *@type {string}
     */
     get [Symbol.toStringTag]() {
@@ -88,6 +96,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * sequence of touch points currently touching the touch surface
+     *@memberof EventDrivers.TouchDriver#
      *@type {TouchList}
     */
     get touches() {
@@ -96,6 +105,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * sequence of touch points currently touching the target touch surface
+     *@memberof EventDrivers.TouchDriver#
      *@type {TouchList}
     */
     get targetTouches() {
@@ -104,6 +114,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * sequence of touch points that has changed since the last touch event
+     *@memberof EventDrivers.TouchDriver#
      *@type {TouchList}
     */
     get changedTouches() {
@@ -112,6 +123,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * boolean value indicating the control key is activated by the event
+     *@memberof EventDrivers.TouchDriver#
      *@type {boolean}
     */
     get ctrlKey() {
@@ -120,6 +132,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * boolean value indicating the shift key is activated by the event
+     *@memberof EventDrivers.TouchDriver#
      *@type {boolean}
     */
     get shiftKey() {
@@ -128,6 +141,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * boolean value indicating the meta key is activated by the event
+     *@memberof EventDrivers.TouchDriver#
      *@type {boolean}
     */
     get metaKey() {
@@ -136,6 +150,7 @@ export default class TouchDriver extends UIDriver {
 
     /**
      * boolean value indicating the alternate key is activated by the event
+     *@memberof EventDrivers.TouchDriver#
      *@type {boolean}
     */
     get altKey() {
