@@ -1,7 +1,7 @@
 {
   "name": "forensic-js",
   "version": "0.0.0-development",
-  "description": "a modular javascript that offers excellent event management, application state management, fetch api, and lots more",
+  "description": "ForensicJS is a collection of tested JavaScript modules that performs different kinds of web development tasks",
   "main": "lib/exports.js",
   "scripts": {
     "commit": "git-cz",
@@ -24,6 +24,15 @@
     "type": "git",
     "url": "https://github.com/harrison-ifeanyichukwu/forensic-js.git"
   },
+  "keywords": [
+    "web-development",
+    "event-management",
+    "fetch-api",
+    "queue-processor",
+    "utility-functions",
+    "xml-parser",
+    "xpath-api"
+  ],
   "author": "Harrison Ifeanyichukwu <Harrisonifeanyichukwu@gmail.com> (http://fjsfoundations.com/)",
   "license": "MIT",
   "bugs": {
