@@ -1,5 +1,11 @@
 # ForensicJS - Module-based JS Library
 
+[![Build Status](https://travis-ci.org/harrison-ifeanyichukwu/forensic-js.svg?branch=master)](https://travis-ci.org/harrison-ifeanyichukwu/forensic-js)
+[![Coverage Status](https://coveralls.io/repos/github/harrison-ifeanyichukwu/forensic-js/badge.svg?branch=master)](https://coveralls.io/github/harrison-ifeanyichukwu/forensic-js?branch=master)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![npm version](https://badge.fury.io/js/forensic-js.svg)](https://badge.fury.io/js/forensic-js)
+![npm](https://img.shields.io/npm/dt/forensic-js.svg)
+
 ForensicJS is a collection of tested JavaScript modules that performs different kinds of web development tasks. It unifies all its API across target environments (browsers, node.js) and provides pollyfills wherever possible.
 
 It is developed to be cross platform and can be used in both `browser` and `node.js` environments without additional setup needs.
@@ -36,7 +42,7 @@ Navigate to `http://localhost:4000/test` to view test.
 
 ## Customizing Your Build
 
-You can customize your own build by tweaking the [Rollup-all](https://github.com/harrison-ifeanyichukwu/rollup-all) `.buildrc.json` config file located inside the project root directory as well as the `exports.js` file (located inside the src directory).
+You can customize your own build by tweaking the [forensic-js](https://github.com/harrison-ifeanyichukwu/forensic-js) `.buildrc.json` config file located inside the project root directory as well as the `exports.js` file (located inside the src directory).
 
 ```shell
 npm run build
