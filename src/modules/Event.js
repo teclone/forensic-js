@@ -19,6 +19,7 @@ import KeyboardDriver from './Event/Drivers/KeyboardDriver.js';
 import TouchDriver from './Event/Drivers/TouchDriver.js';
 import WheelDriver from './Event/Drivers/WheelDriver.js';
 import InputDriver from './Event/Drivers/InputDriver.js';
+import MatchesSelectorPollyfill from './Event/Pollyfills/MatchesSelectorPollyfill.js';
 
 /**
  *@typedef {Object} BindEventOptions
@@ -158,23 +159,46 @@ let
         let result = Queue.fnSort(c2.runFirst, c1.runFirst) || Queue.fnSort(c1.runLast, c2.runLast) ||
         Queue.fnSort(c1.priority, c2.priority);
 
-        if (result === 0) {
-            if (t1 === t2)
-                return 0;
-            if (t1 === host)
-                return 1;
-            if (t2 === host)
-                return -1;
+        if (result !== 0)
+            return result;
+
+        if (t1 === t2)
+            return 0;
+
+        //if typeof target1 is string, return -1. it should come first
+        if (typeof t1 === 'string')
+            return -1;
+
+        //if typeof target2 is string, return 1. it should come first
+        if (typeof t2 === 'string')
+            return 1;
+
+        //a case of window and document
+        if ((t1 === host && t2 === root) || (t2 === host && t1 === root)) {
             if (t1 === root)
-                return 1;
-            if (t2 === root)
                 return -1;
-            if (Util.nodeContains(t2, t1))
-                return -1;
-            if (Util.nodeContains(t1, t2))
+            else
                 return 1;
         }
-        return result;
+
+        // if target 1 is equal to host or root, it should come last
+        if (t1 === host || t1 === root)
+            return 1;
+
+        // if target 2 is equal to host or root, it should come last
+        if (t2 === host || t2 === root)
+            return -1;
+
+        // if target 2 is parent of target 1, then target 1 should come first
+        if (Util.nodeContains(t2, t1))
+            return -1;
+
+        // if target 1 is parent of target 2, then target 1 should come last
+        if (Util.nodeContains(t1, t2))
+            return 1;
+
+        //return 0;
+        return 0;
     },
 
     /**
@@ -355,7 +379,7 @@ let
      *@private
      *@param {string} type - the event type
      *@param {Function} callback - the event callback listener
-     *@param {EventTarget} target - the event target
+     *@param {EventTarget|CSSSelector} target - the event target or css selector
      *@param {Object} config - event listener configuration object,
      *@param {boolean} config.passive - boolean value indicating if the listener is a passive listener
      *@param {boolean} config.capture - boolean value indicating if the listener should be bound on the capture phase
@@ -364,39 +388,45 @@ let
      *@returns {boolean}
     */
     proceedToBind = function(type, callback, target, config, scope, parameters) {
-        let shouldProceed = false;
-        /* istanbul ignore else */
-        if (typeof type === 'string' && type) {
-            shouldProceed = true;
-            let boundTypes = config.passive? eventStates.boundPassiveEventTypes : eventStates.boundEventTypes;
+        //return false if type is not an event type
+        if (typeof type !== 'string')
+            return false;
 
-            if (boundTypes.includes(type))
-                shouldProceed = false;
-            else
-                boundTypes.push(type);
+        //return false if target is css selector and user set it as capture listener
+        if (typeof target === 'string' && config.capture)
+            return false;
 
-            //check if we should store the listener
-            let listeners = null,
-                storelistener = true;
+        let shouldProceed = true,
+            boundTypes = config.passive?
+                eventStates.boundPassiveEventTypes : eventStates.boundEventTypes;
 
-            if (config.capture)
-                listeners = config.passive? eventStates.capturePhasePassiveEventListeners : eventStates.capturePhaseEventListeners;
-            else
-                listeners = config.passive? eventStates.passiveEventListeners : eventStates.eventListeners;
+        if (boundTypes.includes(type))
+            shouldProceed = false;
+        else
+            boundTypes.push(type);
 
-            if (typeof listeners[type] === 'undefined')
-                listeners[type]= new Queue([], true, false, fnSort);
-            else
-                listeners[type].forEach(function(listener) {
-                    if (listener.callback === callback && listener.target === target) {
-                        storelistener = false;
-                        return 'stop';
-                    }
-                });
+        //check if we should store the listener
+        let listeners = null,
+            storelistener = true;
 
-            if (storelistener)
-                listeners[type].push({callback, target, scope, parameters, config});
-        }
+        if (config.capture)
+            listeners = config.passive? eventStates.capturePhasePassiveEventListeners : eventStates.capturePhaseEventListeners;
+        else
+            listeners = config.passive? eventStates.passiveEventListeners : eventStates.eventListeners;
+
+        if (typeof listeners[type] === 'undefined')
+            listeners[type]= new Queue([], true, false, fnSort);
+        else
+            listeners[type].forEach(function(listener) {
+                if (listener.callback === callback && listener.target === target) {
+                    storelistener = false;
+                    return 'stop';
+                }
+            });
+
+        if (storelistener)
+            listeners[type].push({callback, target, scope, parameters, config});
+
         return shouldProceed;
     },
 
@@ -405,59 +435,64 @@ let
      *@private
      *@param {string} type - the event type
      *@param {Function} callback - the event listener callback function
-     *@param {EventTarget} target - the event target
+     *@param {EventTarget|CSSSelector} target - the event target or css selector
      *@param {Object} config - event listener configuration object
      *@param {boolean} config.bindPassive - boolean value indicating if the listener is a passive listener
      *@param {boolean} config.capture - boolean value indicating if the listener was bound on the capture phase
      *@returns {boolean}
     */
     proceedToUnbind = function(type, callback, target, config) {
-        let shouldProceed = false;
-        /* istanbul ignore else */
-        if (typeof type === 'string' && type) {
-            let boundTypes = null,
-                listeners = null,
-                alternatePhaseListeners = null;
+        //return false if type is not an event type
+        if (typeof type !== 'string')
+            return false;
 
-            if (config.passive) {
-                boundTypes = eventStates.boundPassiveEventTypes;
+        //return false if target is css selector and user set it as capture listener
+        if (typeof target === 'string' && config.capture)
+            return false;
 
-                if (config.capture) {
-                    listeners = eventStates.capturePhasePassiveEventListeners;
-                    alternatePhaseListeners = eventStates.passiveEventListeners;
-                }
-                else {
-                    listeners = eventStates.passiveEventListeners;
-                    alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
-                }
+        let shouldProceed = false,
+            boundTypes = null,
+            listeners = null,
+            alternatePhaseListeners = null;
+
+        if (config.passive) {
+            boundTypes = eventStates.boundPassiveEventTypes;
+
+            if (config.capture) {
+                listeners = eventStates.capturePhasePassiveEventListeners;
+                alternatePhaseListeners = eventStates.passiveEventListeners;
             }
             else {
-                boundTypes = eventStates.boundEventTypes;
-
-                if (config.capture) {
-                    listeners = eventStates.capturePhaseEventListeners;
-                    alternatePhaseListeners = eventStates.eventListeners;
-                }
-                else {
-                    listeners = eventStates.eventListeners;
-                    alternatePhaseListeners = eventStates.capturePhaseEventListeners;
-                }
+                listeners = eventStates.passiveEventListeners;
+                alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
             }
+        }
+        else {
+            boundTypes = eventStates.boundEventTypes;
 
-            if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
-                listeners[type].length > 0) {
-                listeners[type].forEach(function(listener, index, queue) {
-                    if (listener.callback === callback && listener.target === target) {
-                        queue.deleteIndex(index);
-                        return 'stop';
-                    }
-                });
+            if (config.capture) {
+                listeners = eventStates.capturePhaseEventListeners;
+                alternatePhaseListeners = eventStates.eventListeners;
+            }
+            else {
+                listeners = eventStates.eventListeners;
+                alternatePhaseListeners = eventStates.capturePhaseEventListeners;
+            }
+        }
 
-                if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
-                    alternatePhaseListeners[type].length === 0)) {
-                    boundTypes.deleteItem(type);
-                    shouldProceed = true;
+        if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
+            listeners[type].length > 0) {
+            listeners[type].forEach(function(listener, index, queue) {
+                if (listener.callback === callback && listener.target === target) {
+                    queue.deleteIndex(index);
+                    return 'stop';
                 }
+            });
+
+            if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
+                alternatePhaseListeners[type].length === 0)) {
+                boundTypes.deleteItem(type);
+                shouldProceed = true;
             }
         }
         return shouldProceed;
@@ -467,59 +502,64 @@ let
      * checks if all event listener unbind process should proceed.
      *@private
      *@param {string} type - the event type
-     *@param {EventTarget} target - the event target
+     *@param {EventTarget|CSSSelector} target - the event target or css selector
      *@param {Object} config - event listener configuration object
      *@param {boolean} config.bindPassive - boolean value indicating if the listener is a passive listener
      *@param {boolean} config.capture - boolean value indicating if the listener was bound on the capture phase
      *@returns {boolean}
     */
     proceedToUnbindAll = function(type, target, config) {
-        let shouldProceed = false;
-        /* istanbul ignore else */
-        if (typeof type === 'string' && type) {
-            let boundTypes = null,
-                listeners = null,
-                alternatePhaseListeners = null;
+        //return false if type is not an event type
+        if (typeof type !== 'string')
+            return false;
 
-            if (config.passive) {
-                boundTypes = eventStates.boundPassiveEventTypes;
+        //return false if target is css selector and user set it as capture listener
+        if (typeof target === 'string' && config.capture)
+            return false;
 
-                if (config.capture) {
-                    listeners = eventStates.capturePhasePassiveEventListeners;
-                    alternatePhaseListeners = eventStates.passiveEventListeners;
-                }
-                else {
-                    listeners = eventStates.passiveEventListeners;
-                    alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
-                }
+        let shouldProceed = false,
+            boundTypes = null,
+            listeners = null,
+            alternatePhaseListeners = null;
+
+        if (config.passive) {
+            boundTypes = eventStates.boundPassiveEventTypes;
+
+            if (config.capture) {
+                listeners = eventStates.capturePhasePassiveEventListeners;
+                alternatePhaseListeners = eventStates.passiveEventListeners;
             }
             else {
-                boundTypes = eventStates.boundEventTypes;
-
-                if (config.capture) {
-                    listeners = eventStates.capturePhaseEventListeners;
-                    alternatePhaseListeners = eventStates.eventListeners;
-                }
-                else {
-                    listeners = eventStates.eventListeners;
-                    alternatePhaseListeners = eventStates.capturePhaseEventListeners;
-                }
+                listeners = eventStates.passiveEventListeners;
+                alternatePhaseListeners = eventStates.capturePhasePassiveEventListeners;
             }
+        }
+        else {
+            boundTypes = eventStates.boundEventTypes;
 
-            if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
-                listeners[type].length > 0) {
-                listeners[type].forEach(function(listener, index, queue) {
-                    /* istanbul ignore else */
-                    if (listener.target === target)
-                        queue.deleteIndex(index);
-                });
+            if (config.capture) {
+                listeners = eventStates.capturePhaseEventListeners;
+                alternatePhaseListeners = eventStates.eventListeners;
+            }
+            else {
+                listeners = eventStates.eventListeners;
+                alternatePhaseListeners = eventStates.capturePhaseEventListeners;
+            }
+        }
 
+        if (boundTypes.includes(type) && typeof listeners[type] !== 'undefined' &&
+            listeners[type].length > 0) {
+            listeners[type].forEach(function(listener, index, queue) {
                 /* istanbul ignore else */
-                if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
-                    alternatePhaseListeners[type].length === 0)) {
-                    boundTypes.deleteItem(type);
-                    shouldProceed = true;
-                }
+                if (listener.target === target)
+                    queue.deleteIndex(index);
+            });
+
+            /* istanbul ignore else */
+            if(listeners[type].length === 0 && (typeof alternatePhaseListeners[type] === 'undefined' ||
+                alternatePhaseListeners[type].length === 0)) {
+                boundTypes.deleteItem(type);
+                shouldProceed = true;
             }
         }
         return shouldProceed;
@@ -559,7 +599,7 @@ let
             //should scope the event target or the current event target?
                 let scope = Util.isObject(listener.scope)? listener.scope : target;
 
-                eventDriver.currentTarget = lTarget;
+                eventDriver.currentTarget = typeof lTarget !== 'string'? lTarget : target;
 
                 if (listener.config.runOnce)
                     eventModule.unbind(eventDriver.type, listener.callback, lTarget, listener.config);
@@ -585,55 +625,71 @@ let
 
         }
 
-        /* istanbul ignore else */
-        if ((capturingListeners && capturingListeners.length > 0) || (listeners && listeners.length > 0)) {
-            let {target, eventDriver} = constructDriver(e);
-            eventDriver.passive = passive;
+        let {target, eventDriver} = constructDriver(e);
+        eventDriver.passive = passive;
 
+        //current event phase is capture phase.
+        if (capturingListeners && capturingListeners.length > 0) {
+            capturingListeners.clone().forEach(listener => {
+                //css selectors are not supported in capturing phase listeners
+                let proceed = false,
+                    lTarget = listener.target;
 
-            //current event phase is capture phase.
-            if (capturingListeners) {
-                capturingListeners.clone().forEach(listener => {
-                    let proceed = false,
-                        lTarget = listener.target;
+                if (lTarget === host || lTarget === root)
+                    proceed = true;
+                else if (Util.nodeContains(lTarget, target))
+                    proceed = true;
 
-                    if (lTarget === host || lTarget === root)
+                if (proceed)
+                    run(eventDriver, listener, target, lTarget);
+
+                if(!eventDriver.isPropagating)
+                    return 'stop';
+            });
+        }
+
+        //enter the target and bubbling phase.
+        if (eventDriver.isPropagating && listeners && listeners.length > 0) {
+            listeners.clone().forEach(listener => {
+                //css selectors are supported in this phase
+                let proceed = false,
+                    lTarget = listener.target,
+                    bubbles = eventDriver.bubbles && listener.config.acceptBubbledEvents,
+                    phase = 0;
+
+                if (typeof lTarget === 'string') {
+                    //target phase
+                    if (Util.isElementNode(target) && target.matches(lTarget)) {
                         proceed = true;
-                    else if (target !== host && target !== root && Util.nodeContains(lTarget, target))
+                        phase = 2;
+                    }
+                }
+                else {
+                    //the same node. target phase
+                    if (lTarget === target) {
                         proceed = true;
-
-                    if (proceed)
-                        run(eventDriver, listener, target, lTarget);
-
-                    if(!eventDriver.isPropagating)
-                        return 'stop';
-                });
-            }
-
-            //enter the next phase.
-            if (listeners && eventDriver.isPropagating) {
-                listeners.clone().forEach(listener => {
-                    let proceed = false,
-                        lTarget = listener.target;
-
-                    if (lTarget === target)
-                        proceed = true;
-                    else if (eventDriver.bubbles && listener.config.acceptBubbledEvents &&
-                    (lTarget === host || lTarget === root || Util.nodeContains(lTarget, target)))
-                        proceed = true;
-
-                    if (proceed) {
-                        eventDriver.phase = lTarget === target? 2 : 3;
-                        run(eventDriver, listener, target, lTarget);
+                        phase = 2;
                     }
 
-                    if(!eventDriver.isPropagating)
-                        return 'stop';
-                });
-            }
+                    //bubbling phase
+                    else if (bubbles && (lTarget === host || lTarget === root ||
+                        Util.nodeContains(lTarget, target))) {
+                        phase = 3;
+                        proceed = true;
+                    }
+                }
 
-            eventDriver.phase = 0;
+                if (proceed) {
+                    eventDriver.phase = phase;
+                    run(eventDriver, listener, target, lTarget);
+                }
+
+                if(!eventDriver.isPropagating)
+                    return 'stop';
+            });
         }
+
+        eventDriver.phase = 0;
     },
 
     /**
@@ -733,6 +789,9 @@ let
      *@private
     */
     init = function() {
+        //install matches selector pollyfill
+        MatchesSelectorPollyfill.install(host);
+
         //test for passive event listener support
         let accessor = {},
             listener = function(){};
@@ -838,7 +897,7 @@ let eventModule = {
     */
     ready(callback, config, scope, ...parameters) {
         if (!Util.isCallable(callback))
-            throw new TypeError('argument one is not a function');
+            throw new TypeError(callback + 'is not a function');
 
         config = constructConfig(config, false);
         eventStates.readyEventListeners.push({callback, scope, parameters, config});
@@ -851,7 +910,7 @@ let eventModule = {
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {BindEventOptions} [config] - optional event binding configuration object
      *@param {Object} [scope] - scope execution object. defaults to host object
      *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
@@ -860,10 +919,10 @@ let eventModule = {
     */
     bind(type, callback, target, config, scope, ...parameters) {
         if (!Util.isCallable(callback))
-            throw new TypeError('argument two is not a function');
+            throw new TypeError(callback + ' is not a function');
 
-        if (!Util.isEventTarget(target))
-            throw new TypeError('argument three is not a valid event target');
+        if (!Util.isEventTarget(target) && !Util.isCSSSelector(target))
+            throw new TypeError(target + ' is not a valid event target or css selector');
 
         let xConfig = constructConfig(config, true),
             types = Util.makeArray(type);
@@ -881,7 +940,7 @@ let eventModule = {
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {BindEventOptions} [config] - optional event binding configuration object
      *@param {Object} [scope] - scope execution object. defaults to host object
      *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
@@ -897,7 +956,7 @@ let eventModule = {
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {BindEventOptions} [config] - optional event binding configuration object
      *@param {Object} [scope] - scope execution object. defaults to host object
      *@param {...*} [parameters] - extra comma separated list of parameters to pass to listener
@@ -918,17 +977,17 @@ let eventModule = {
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
      *@throws {TypeError} if listener is not a function or if target is not a valid event target
      *@returns {this}
     */
     unbind(type, callback, target, config) {
         if (!Util.isCallable(callback))
-            throw new TypeError('argument two is not a function');
+            throw new TypeError(callback + ' is not a function');
 
-        if (!Util.isEventTarget(target))
-            throw new TypeError('argument three is not a valid event target');
+        if (!Util.isEventTarget(target) && !Util.isCSSSelector(target))
+            throw new TypeError(target + ' is not a valid event target or css selector');
 
         let xConfig = constructConfig(config, true),
             types = Util.makeArray(type);
@@ -946,7 +1005,7 @@ let eventModule = {
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
      *@param {Function} callback - event listener callback
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
      *@throws {TypeError} if listener is not a function or if target is not a valid event target
      *@returns {this}
@@ -959,14 +1018,14 @@ let eventModule = {
      * unbinds all event listeners for specified event type(s) on a given event target.
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
      *@throws {Error|TypeError} if target is not a valid event target
      *@returns {this}
     */
     unbindAll(type, target, config) {
-        if (!Util.isEventTarget(target))
-            throw new TypeError('argument two is not a valid event target');
+        if (!Util.isEventTarget(target) && !Util.isCSSSelector(target))
+            throw new TypeError(target + ' is not a valid event target or css selector');
 
         let xConfig = constructConfig(config, true),
             types = Util.makeArray(type);
@@ -983,7 +1042,7 @@ let eventModule = {
      * unbinds all event listeners for specified event type(s) on a given event target.
      *@memberof Event
      *@param {string|string[]} type - event type or array of event types
-     *@param {EventTarget} target - event target object
+     *@param {EventTarget|CSSSelector} target - event target object or css selector
      *@param {UnbindEventOptions} [config] - optional event unbind configuration object
      *@throws {TypeError} if listener is not a function or if target is not a valid event target
      *@returns {this}
@@ -1005,7 +1064,7 @@ let eventModule = {
     */
     dispatch(type, target, eventInit, detail) {
         if (!Util.isEventTarget(target))
-            throw new TypeError('argument two is not a valid event target');
+            throw new TypeError(target + ' is not a valid event target');
 
         let types = Util.makeArray(type);
 
@@ -1180,13 +1239,13 @@ let
 
         let css = Util.camelCase(prefix + 'animation'),
             cssCode = `@${keyframePrefix}keyframes test_animation {
-            0%{
-                background-color: white;
-            }
-            100%{
-                background-color: #f3f3f3;
-            }
-        }`,
+                0%{
+                    background-color: white;
+                }
+                100%{
+                    background-color: #f3f3f3;
+                }
+            }`,
             style = Util.loadInlineCSS(cssCode);
 
         elm.style.backgroundColor = 'white';
