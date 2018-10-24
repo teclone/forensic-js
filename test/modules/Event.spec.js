@@ -3,7 +3,8 @@ import _Event from '../../src/modules/Event.js';
 describe('Event module', function() {
     let testDiv = null,
         testImage = null,
-        testInput = null;
+        testInput = null,
+        testSelector = '';
 
     before(function() {
         testDiv = document.createElement('div');
@@ -11,6 +12,9 @@ describe('Event module', function() {
             <input type="text" name="txt-test-input" value="" />
             <img src="" alt="test image" />
         `;
+
+        testDiv.className = 'test-div test-target';
+        testSelector = '.test-div';
 
         document.body.appendChild(testDiv);
         testInput = testDiv.firstElementChild;
@@ -319,7 +323,31 @@ describe('Event module', function() {
                 .dispatch('click', testDiv);
         });
 
-        it (`should not bind the same event listener callback two times on an event target for a
+        it(`should bind an event listener callback for the given event type(s) on the given
+            css selector target`, function() {
+            let callCount = 0,
+                nonExistingSelector = '#non-existing-selector';
+
+            let callback = function() {
+                callCount += 1;
+            };
+
+            _Event.bind('click', callback, testSelector)
+                .bind('click', callback, nonExistingSelector)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+            _Event.unbind('click', callback, testSelector)
+
+                .unbind('click', callback, nonExistingSelector)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+        });
+
+        it (`should not bind the same event listener callback two times on an event target/selector for a
         given event type when both have the same passive and capture configuration flags.`, function() {
             let callCount = 0,
 
@@ -336,6 +364,24 @@ describe('Event module', function() {
                 .dispatch('click', testDiv);
 
             expect(callCount).to.equals(1);
+        });
+
+        it(`should not bind an a capture phase event listener callback when given a css
+            selector as target`, function() {
+            let callCount = 0;
+            let callback = function() {
+                callCount += 1;
+            };
+
+            _Event.bind('click', callback, testSelector, {
+                capture: true,
+            })
+
+                .dispatch('click', testDiv)
+
+                .unbind('click', callback, testSelector, {capture: true});
+
+            expect(callCount).to.equals(0);
         });
 
         it(`should pass in an event object to the callback method during execution`, function(done) {
@@ -389,8 +435,12 @@ describe('Event module', function() {
                 .to.throw(TypeError);
         });
 
+        it(`should do nothing if the event type is not a string`, function() {
+            _Event.bind(null, function() {}, testSelector);
+        });
+
         it(`should sort listeners according to their node order by default, from target to its parent
-        hierrachy up to document and finally to window object`, function() {
+        hierrachy up to document and finally to window object, with css selectors appearing first`, function() {
             let signatures = [];
 
             _Event.bind('click', () => {
@@ -409,9 +459,13 @@ describe('Event module', function() {
                     signatures.push('div');
                 }, testDiv, {runOnce: true})
 
+                .bind('click', () => {
+                    signatures.push('selector');
+                }, testSelector, {runOnce: true})
+
                 .dispatch('click', testDiv);
 
-            expect(signatures).to.deep.equals(['div', 'body', 'document', 'window']);
+            expect(signatures).to.deep.equals(['selector', 'div', 'body', 'document', 'window']);
         });
 
         it(`should take an optional config.priority integer value as a fourth argument. The
@@ -780,6 +834,30 @@ describe('Event module', function() {
             expect(callCount).to.equals(1);
         });
 
+        it(`should unbind an event listener callback for the given event type(s) on the given
+            css selector target`, function() {
+            let callCount = 0;
+            let callback = function() {
+                callCount += 1;
+            };
+
+            _Event.bind('click', callback, testSelector)
+
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+
+            _Event.unbind('click', callback, testSelector)
+                .dispatch('click', testDiv);
+
+            expect(callCount).to.equals(1);
+        });
+
+        it(`should not proceed unbinding an event listener callback for a css selector target
+        when the config.capture option is set to true`, function() {
+            _Event.unbind('click', () => {}, testSelector, {capture: true});
+        });
+
         it('should throw TypeError if callback is not a function', function() {
             expect(function() {
                 _Event.unbind('click', null);
@@ -790,6 +868,10 @@ describe('Event module', function() {
             expect(function() {
                 _Event.unbind('click', function() {}, null);
             }).to.throw(TypeError);
+        });
+
+        it(`should do nothing if the event type is not a string`, function() {
+            _Event.unbind(null, function() {}, testSelector);
         });
 
         it(`when unbinding capturing events, and or passive events, the same flag must be supplied
@@ -957,10 +1039,19 @@ describe('Event module', function() {
             expect(callCount).to.equals(2);
         });
 
+        it(`should not proceed unbinding all event listener callbacks for a css selector target
+        when the config.capture option is set to true`, function() {
+            _Event.unbindAll('click', testSelector, {capture: true});
+        });
+
         it('should throw TypeError if target is not an eventTarget', function() {
             expect(function() {
                 _Event.unbindAll('click', null);
             }).to.throw(TypeError);
+        });
+
+        it(`should do nothing if the event type is not a string`, function() {
+            _Event.unbindAll(null, testSelector);
         });
 
         it(`when unbinding capturing events, and or passive events, the same flag must be supplied
