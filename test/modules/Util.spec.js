@@ -193,6 +193,17 @@ describe('Util module', function() {
         });
     });
 
+    describe('.isCSSSelector(variable)', function() {
+        it('should return true if argument is a valid css selector', function() {
+            expect(Util.isCSSSelector('.btn')).to.be.true;
+            expect(Util.isCSSSelector('body > p')).to.be.true;
+        });
+        it('should return false if argument is not a valid css selector', function() {
+            expect(Util.isCSSSelector(null)).to.be.false;
+            expect(Util.isCSSSelector('$not')).to.be.false;
+        });
+    });
+
     describe('.isValidParameter(variable, excludeNulls?)', function() {
         it('should return true if argument is a valid function parameter. a valid function parameter is a parameter that is defined', function() {
             expect(Util.isValidParameter(3.2)).to.be.true;
@@ -313,9 +324,11 @@ describe('Util module', function() {
 
         it('should accept an optional wait before execution parameter in milliseconds as a fourth parameter', function() {
             let startTime = Date.now();
-
-            return Util.runSafe(() => Date.now() - startTime, null, null, 1000)
-                .then(result => expect(result).to.be.at.least(999));
+            return Util.runSafe(() => {
+                return Date.now() - startTime;
+            }, null, null, 1000).then(result => {
+                expect(result).to.be.at.least(999);
+            });
         });
 
         it('should return a promise if given a wait parameter as fourth argument', function() {
