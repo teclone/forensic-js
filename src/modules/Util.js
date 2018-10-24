@@ -3,7 +3,47 @@
  * this module defines a bunch of utility functions that will be relevant to most other modules
  *@module Util
 */
-import {toString, host, root, install} from './Globals.js';
+import {toString, host, root, install, onInstall} from './Globals.js';
+
+let testDiv = null,
+
+    /**
+     * returns a promise that runs a callback function after the given time interval
+     *@param {Function} callback - the callback function
+     *@param {number} runAfter - time to wait before running callback
+     *@return {Promise}
+    */
+    createPromisedRunner = function(callback, runAfter) {
+        return new Promise(function(resolve) {
+            setTimeout(() => {
+                resolve(callback()); // pass in the return value to the resolve method
+            }, runAfter);
+        });
+    },
+
+    /**
+     * scope execution callback
+     *@param {Function} callback - the callback function
+     *@param {Object} scope - callback scope
+     *@param {Array} parameters - array of parameters
+     *@return {Function}
+    */
+    scopeCallback = function(callback, scope, parameters) {
+        return (...args) => {
+            try {
+                return callback.call(scope, ...args, ...parameters);
+            }
+            catch (ex) {
+                return null;
+            }
+        };
+    };
+
+/** initialize test div once the globals are installed */
+onInstall(() => {
+    testDiv = root.createElement('div');
+    testDiv.appendChild(root.createElement('p'));
+});
 
 export default {
     /**
@@ -228,15 +268,7 @@ export default {
         scope = this.isObject(scope) ? scope : host;
         parameters = this.makeArray(parameters);
 
-        return (...args) => {
-            let mergedParameters = [...args, ...parameters];
-            try {
-                return callback.apply(scope, mergedParameters);
-            }
-            catch (ex) {
-                //
-            }
-        };
+        return scopeCallback(callback, scope, parameters);
     },
 
     /**
@@ -253,11 +285,7 @@ export default {
     runSafe(executable, scope, parameters, runAfter) {
         let callback = this.generateCallback(executable, scope, parameters);
         if (runAfter)
-            return new Promise(function(resolve) {
-                setTimeout(() => {
-                    resolve(callback()); // pass in the return value to the resolve method
-                }, runAfter);
-            });
+            return createPromisedRunner(callback, runAfter);
         else
             return callback();
     },
