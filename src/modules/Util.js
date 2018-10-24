@@ -199,6 +199,24 @@ export default {
     },
 
     /**
+     * returns boolean indicating if argument is a valid css selector
+     *@param {mixed} variable  - variable to test
+     *@return {boolean}
+    */
+    isCSSSelector(variable) {
+        if (typeof variable !== 'string')
+            return false;
+
+        try {
+            testDiv.querySelector(variable);
+            return true;
+        }
+        catch(ex) {
+            return false;
+        }
+    },
+
+    /**
      * tests if a variable is a valid function parameter
      *@param {*} variable - variable to test
      *@param {boolean} excludeNulls - boolean value indicating if null values should be
